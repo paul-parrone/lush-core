@@ -1,4 +1,4 @@
-package com.px3j.service.core.api;
+package com.px3j.lush.core.api;
 
 import java.util.Collections;
 import java.util.HashMap;
