@@ -1,4 +1,4 @@
-package com.px3j.lush.core.api;
+package com.px3j.lush.service;
 
 import lombok.*;
 
@@ -10,7 +10,7 @@ import lombok.*;
  */
 @NoArgsConstructor
 @Data
-public class ApiContext {
-    private ApiResponse response;
+public class Context {
+    private ServiceResponse response;
     private String requestKey;
 }

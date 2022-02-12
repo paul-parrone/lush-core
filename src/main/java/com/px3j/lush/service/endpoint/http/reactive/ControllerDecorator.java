@@ -1,10 +1,9 @@
-package com.px3j.lush.core.reactive.controller;
+package com.px3j.lush.service.endpoint.http.reactive;
 
 import com.google.gson.Gson;
-import com.px3j.lush.core.api.*;
 import com.px3j.lush.core.exception.StackTraceToLoggerWriter;
-import com.px3j.lush.core.reactive.filters.CarryingApiContext;
-import com.px3j.lush.core.reactive.filters.ThreadLocalApiContext;
+import com.px3j.lush.service.Constants;
+import com.px3j.lush.service.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -13,23 +12,20 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.sleuth.Tracer;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Arrays;
-import java.util.Optional;
 
 @Slf4j
 @Aspect
 @Component()
-public class ApiControllerDecorator {
+public class ControllerDecorator {
     private final Tracer tracer;
 
     @Autowired
-    public ApiControllerDecorator( Tracer tracer ) {
+    public ControllerDecorator(Tracer tracer ) {
         this.tracer = tracer;
     }
 
@@ -44,7 +40,7 @@ public class ApiControllerDecorator {
     }
 
     private Object decoratorImpl(ProceedingJoinPoint pjp, boolean fluxOnError ) {
-        CarryingApiContext apiContext = (CarryingApiContext)ThreadLocalApiContext.get();
+        CarryingContext apiContext = (CarryingContext)ThreadLocalApiContext.get();
 
         try {
             Method method = getMethodBeingCalled(pjp);
@@ -72,26 +68,26 @@ public class ApiControllerDecorator {
         }
     }
 
-    private void injectApiContext( Method method, ProceedingJoinPoint pjp, ApiContext apiContext ) {
+    private void injectApiContext( Method method, ProceedingJoinPoint pjp, Context context) {
         int index = 0;
 
         for( Parameter p : method.getParameters() ) {
-            if( p.getType() == ApiContext.class ) {
+            if( p.getType() == Context.class ) {
                 // Set the values on the context in the args array...
-                ApiContext contextArg = (ApiContext) pjp.getArgs()[index];
-                contextArg.setRequestKey( apiContext.getRequestKey() );
-                contextArg.setResponse( apiContext.getResponse() );
+                Context contextArg = (Context) pjp.getArgs()[index];
+                contextArg.setRequestKey( context.getRequestKey() );
+                contextArg.setResponse( context.getResponse() );
             }
 
             index++;
         }
     }
 
-    private void addResponseHeader( CarryingApiContext context ) {
+    private void addResponseHeader( CarryingContext context ) {
         context.getExchange()
                 .getResponse()
                 .getHeaders()
-                .add( ApiConstants.RESPONSE_HEADER_NAME, new Gson().toJson(context.getResponse()) );
+                .add( Constants.RESPONSE_HEADER_NAME, new Gson().toJson(context.getResponse()) );
     }
 
     private Method getMethodBeingCalled(ProceedingJoinPoint pjp ) throws NoSuchMethodException, SecurityException {

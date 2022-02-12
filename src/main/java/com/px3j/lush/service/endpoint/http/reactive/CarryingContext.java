@@ -1,6 +1,6 @@
-package com.px3j.lush.core.reactive.filters;
+package com.px3j.lush.service.endpoint.http.reactive;
 
-import com.px3j.lush.core.api.ApiContext;
+import com.px3j.lush.service.Context;
 import lombok.Getter;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -10,7 +10,7 @@ import org.springframework.web.server.ServerWebExchange;
  *
  * @author Paul Parrone
  */
-public class CarryingApiContext extends ApiContext {
+class CarryingContext extends Context {
     @Getter
     ServerWebExchange exchange;
 

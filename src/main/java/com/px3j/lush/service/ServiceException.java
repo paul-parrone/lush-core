@@ -1,15 +1,15 @@
-package com.px3j.lush.core.api;
+package com.px3j.lush.service;
 
-public class ApiException extends RuntimeException {
+public class ServiceException extends RuntimeException {
     private final String code;
     private final String displayableMessage;
 
-    public ApiException(String code, String displayableMessage) {
+    public ServiceException(String code, String displayableMessage) {
         this.code = code;
         this.displayableMessage = displayableMessage;
     }
 
-    public ApiException(Throwable cause, String code, String displayableMessage) {
+    public ServiceException(Throwable cause, String code, String displayableMessage) {
         super(cause);
         this.code = code;
         this.displayableMessage = displayableMessage;

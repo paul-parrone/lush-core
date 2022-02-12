@@ -1,6 +1,6 @@
 package com.px3j.lush.illustrator.tests;
 
-import com.px3j.lush.core.api.ApiConstants;
+import com.px3j.lush.service.Constants;
 import com.px3j.lush.illustrator.model.Cat;
 import com.px3j.lush.illustrator.repository.CatRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -73,7 +73,7 @@ public class LushTests {
 
                 .exchange()
                 .expectHeader().value(
-                        ApiConstants.RESPONSE_HEADER_NAME,
+                        Constants.RESPONSE_HEADER_NAME,
                         h -> log.info(h.toString())
                 );
 //                .expectBody(Map.class)
@@ -91,7 +91,7 @@ public class LushTests {
 
                 .exchange()
                 .expectHeader().value(
-                        ApiConstants.RESPONSE_HEADER_NAME,
+                        Constants.RESPONSE_HEADER_NAME,
                         h -> log.info(h.toString())
                 );
 //                .expectBody(Map.class)

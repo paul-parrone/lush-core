@@ -1,6 +1,6 @@
-package com.px3j.lush.core.reactive.filters;
+package com.px3j.lush.service.endpoint.http.reactive;
 
-import com.px3j.lush.core.api.ApiResponse;
+import com.px3j.lush.service.ServiceResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.sleuth.Tracer;
@@ -17,21 +17,21 @@ import reactor.core.publisher.Mono;
  */
 @Slf4j
 @Component
-public class ApiFilter implements WebFilter {
+public class EndpointFilter implements WebFilter {
     private final Tracer tracer;
 
     @Autowired
-    public ApiFilter(Tracer tracer) {
+    public EndpointFilter(Tracer tracer) {
         this.tracer = tracer;
     }
 
     @Override
     public Mono<Void> filter(final ServerWebExchange exchange, WebFilterChain webFilterChain) {
         final String requestKey = generateRequestKey();
-        ApiResponse response = new ApiResponse(requestKey, 200, "");
+        ServiceResponse response = new ServiceResponse(requestKey, 200, "");
 
         // Set up the thread local ApiContext object - this will be used by the decorator to handle the reqeust/response
-        CarryingApiContext apiContext = (CarryingApiContext) ThreadLocalApiContext.get();
+        CarryingContext apiContext = (CarryingContext) ThreadLocalApiContext.get();
         apiContext.setRequestKey( requestKey );
         apiContext.setResponse( response );
         apiContext.setExchange( exchange );

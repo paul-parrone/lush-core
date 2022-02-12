@@ -1,7 +1,7 @@
 package com.px3j.lush.illustrator.controller;
 
-import com.px3j.lush.core.api.ApiContext;
-import com.px3j.lush.core.api.ApiResponse;
+import com.px3j.lush.service.Context;
+import com.px3j.lush.service.ServiceResponse;
 import com.px3j.lush.illustrator.model.Cat;
 import com.px3j.lush.illustrator.repository.CatRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -12,9 +12,13 @@ import reactor.core.publisher.Mono;
 
 import java.util.Map;
 
+// service.endpoint.http
+// service.endpoint.xxx
+
 @Slf4j
 @RestController
 @RequestMapping("cats")
+@CrossOrigin("*")
 public class CatController  {
     private final CatRepository repository;
 
@@ -45,12 +49,12 @@ public class CatController  {
     }
 
     @RequestMapping(value = "troublePost", method = RequestMethod.POST)
-    public Mono<Cat> troublePost(@RequestBody Map<String,Object> someData, ApiContext apiContext ) {
+    public Mono<Cat> troublePost(@RequestBody Map<String,Object> someData, Context context) {
         log.info( "Some data is: " + someData.toString() );
 
-        ApiResponse apiResponse = apiContext.getResponse();
-        apiResponse.setStatusCode(555);
-        apiResponse.setDisplayableMessage( "This is a trouble cat" );
+        ServiceResponse serviceResponse = context.getResponse();
+        serviceResponse.setStatusCode(555);
+        serviceResponse.setDisplayableMessage( "This is a trouble cat" );
 
         return Mono.just(
                 new Cat("one", "Tonkinese", "Brown", "Trouble", 1 )
