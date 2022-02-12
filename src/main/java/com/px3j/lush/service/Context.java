@@ -12,5 +12,5 @@ import lombok.*;
 @Data
 public class Context {
     private ServiceResponse response;
-    private String requestKey;
+    private String traceId;
 }

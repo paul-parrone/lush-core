@@ -75,7 +75,7 @@ public class ControllerDecorator {
             if( p.getType() == Context.class ) {
                 // Set the values on the context in the args array...
                 Context contextArg = (Context) pjp.getArgs()[index];
-                contextArg.setRequestKey( context.getRequestKey() );
+                contextArg.setTraceId( context.getTraceId() );
                 contextArg.setResponse( context.getResponse() );
             }
 

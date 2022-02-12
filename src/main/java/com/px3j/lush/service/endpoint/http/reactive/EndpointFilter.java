@@ -27,14 +27,14 @@ public class EndpointFilter implements WebFilter {
 
     @Override
     public Mono<Void> filter(final ServerWebExchange exchange, WebFilterChain webFilterChain) {
-        final String requestKey = generateRequestKey();
+        final String requestKey = generateTraceId();
         ServiceResponse response = new ServiceResponse(requestKey, 200, "");
 
         // Set up the thread local ApiContext object - this will be used by the decorator to handle the reqeust/response
-        CarryingContext apiContext = (CarryingContext) ThreadLocalApiContext.get();
-        apiContext.setRequestKey( requestKey );
-        apiContext.setResponse( response );
-        apiContext.setExchange( exchange );
+        CarryingContext context = (CarryingContext) ThreadLocalApiContext.get();
+        context.setTraceId( requestKey );
+        context.setResponse( response );
+        context.setExchange( exchange );
 
         return webFilterChain.filter(exchange);
     }
@@ -44,7 +44,7 @@ public class EndpointFilter implements WebFilter {
      *
      * @return A String containing the request key.
      */
-    private String generateRequestKey() {
+    private String generateTraceId() {
         String contextKey = "?/?";
 
         if( tracer.currentSpan() != null ) {
