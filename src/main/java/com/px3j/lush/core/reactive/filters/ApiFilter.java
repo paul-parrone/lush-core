@@ -1,23 +1,20 @@
 package com.px3j.lush.core.reactive.filters;
 
-import com.px3j.lush.core.api.ApiConstants;
 import com.px3j.lush.core.api.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.sleuth.Tracer;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.http.server.reactive.ServerHttpResponseDecorator;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.ServerWebExchangeDecorator;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
+/**
+ * Filter that will set up each request for consumption down the line.
+ *
+ * @author Paul Parrone
+ */
 @Slf4j
 @Component
 public class ApiFilter implements WebFilter {
@@ -33,16 +30,20 @@ public class ApiFilter implements WebFilter {
         final String requestKey = generateRequestKey();
         ApiResponse response = new ApiResponse(requestKey, 200, "");
 
-        // Set up the thread local ApiContext object - will be used by the decorator to handle the reqeust/response
+        // Set up the thread local ApiContext object - this will be used by the decorator to handle the reqeust/response
         CarryingApiContext apiContext = (CarryingApiContext) ThreadLocalApiContext.get();
         apiContext.setRequestKey( requestKey );
         apiContext.setResponse( response );
         apiContext.setExchange( exchange );
 
         return webFilterChain.filter(exchange);
-//        return webFilterChain.filter(decorate(exchange));
     }
 
+    /**
+     * Generate a request key that matches the current span of the Tracer
+     *
+     * @return A String containing the request key.
+     */
     private String generateRequestKey() {
         String contextKey = "?/?";
 
@@ -51,46 +52,5 @@ public class ApiFilter implements WebFilter {
         }
 
         return contextKey;
-    }
-
-//    private ServerWebExchange decorate(ServerWebExchange exchange) {
-//        return new ApiServerWebExchangeDecorator(exchange);
-//    }
-}
-
-
-final class ApiServerWebExchangeDecorator extends ServerWebExchangeDecorator {
-    private final ServerHttpResponseDecorator responseDecorator;
-
-    public ApiServerWebExchangeDecorator(ServerWebExchange delegate) {
-        super(delegate);
-        this.responseDecorator = new ApiServerHttpResponseDecorator(delegate.getResponse());
-    }
-
-    @Override
-    public ServerHttpResponse getResponse() {
-        return responseDecorator;
-    }
-}
-
-class ApiServerHttpResponseDecorator extends ServerHttpResponseDecorator {
-    private final StringBuilder cachedBody = new StringBuilder();
-
-    public ApiServerHttpResponseDecorator(ServerHttpResponse delegate) {
-        super(delegate);
-    }
-
-    @Override
-    public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
-        return super.writeWith(Mono.from(body).doOnNext(
-                this::addApiHeader
-        ));
-    }
-
-    private void addApiHeader(DataBuffer buffer) {
-        cachedBody.append(UTF_8.decode(buffer.asByteBuffer()).toString());
-        if( cachedBody.indexOf("unexpectedError") != -1 ) {
-            getDelegate().getHeaders().add( ApiConstants.RESPONSE_HEADER_NAME, cachedBody.toString() );
-        }
     }
 }

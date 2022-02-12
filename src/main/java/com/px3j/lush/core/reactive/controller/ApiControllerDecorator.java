@@ -26,7 +26,7 @@ import java.util.Optional;
 @Aspect
 @Component()
 public class ApiControllerDecorator {
-    Tracer tracer;
+    private final Tracer tracer;
 
     @Autowired
     public ApiControllerDecorator( Tracer tracer ) {
@@ -46,30 +46,12 @@ public class ApiControllerDecorator {
     private Object decoratorImpl(ProceedingJoinPoint pjp, boolean fluxOnError ) {
         CarryingApiContext apiContext = (CarryingApiContext)ThreadLocalApiContext.get();
 
-        boolean isConversational = false;
-
         try {
             Method method = getMethodBeingCalled(pjp);
-
-            int index = 0;
-            for( Parameter p : method.getParameters() ) {
-                if( p.getType() == ApiContext.class ) {
-
-                    // Set the values on the context in the args array...
-                    ApiContext contextArg = (ApiContext) pjp.getArgs()[index];
-                    contextArg.setRequestKey( apiContext.getRequestKey() );
-                    contextArg.setResponse( apiContext.getResponse() );
-
-                    isConversational = true;
-                }
-                index++;
-            }
+            injectApiContext(method, pjp, apiContext);
 
             Object returnValue = pjp.proceed();
-            if( isConversational ) {
-                addResponseHeader( apiContext );
-            }
-
+            addResponseHeader( apiContext );
             return returnValue;
         }
 
@@ -83,14 +65,25 @@ public class ApiControllerDecorator {
             apiContext.getResponse().setStatusCode( -999 );
 
             addResponseHeader( apiContext );
-//            ApiUnexpectedError err = new ApiUnexpectedError(requestKey, "550", message );
-//            final String errorJson = new Gson().toJson(err);
-
             return fluxOnError ? Flux.empty() : Mono.empty();
-//            return fluxOnError ? Flux.just(errorJson) : Mono.just(errorJson);
         }
         finally {
             log.debug( "finally done" );
+        }
+    }
+
+    private void injectApiContext( Method method, ProceedingJoinPoint pjp, ApiContext apiContext ) {
+        int index = 0;
+
+        for( Parameter p : method.getParameters() ) {
+            if( p.getType() == ApiContext.class ) {
+                // Set the values on the context in the args array...
+                ApiContext contextArg = (ApiContext) pjp.getArgs()[index];
+                contextArg.setRequestKey( apiContext.getRequestKey() );
+                contextArg.setResponse( apiContext.getResponse() );
+            }
+
+            index++;
         }
     }
 
