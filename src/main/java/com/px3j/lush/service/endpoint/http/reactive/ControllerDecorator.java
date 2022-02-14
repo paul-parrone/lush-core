@@ -55,9 +55,6 @@ public class ControllerDecorator {
         catch (final Throwable throwable) {
             throwable.printStackTrace( new StackTraceToLoggerWriter(log) );
 
-            final String message = null == throwable.getMessage() ? "Unexpected Error" : throwable.getMessage();
-
-            apiContext.getResponse().setDisplayableMessage( message );
             apiContext.getResponse().setStatusCode( -999 );
 
             addResponseHeader( apiContext );

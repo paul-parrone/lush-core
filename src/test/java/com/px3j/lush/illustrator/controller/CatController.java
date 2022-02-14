@@ -1,7 +1,7 @@
 package com.px3j.lush.illustrator.controller;
 
 import com.px3j.lush.service.Context;
-import com.px3j.lush.service.ServiceResponse;
+import com.px3j.lush.service.ResponseAdvice;
 import com.px3j.lush.illustrator.model.Cat;
 import com.px3j.lush.illustrator.repository.CatRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("cats")
-@CrossOrigin("*")
+@CrossOrigin(origins="*", exposedHeaders = {"x-lush-response"} )
 public class CatController  {
     private final CatRepository repository;
 
@@ -36,6 +36,7 @@ public class CatController  {
 
     @RequestMapping( value = "findAll", method = RequestMethod.GET)
     public Flux<Cat> findAll() {
+        log.info( "findAll() has been called" );
         return repository.findAll();
     }
 
@@ -52,9 +53,10 @@ public class CatController  {
     public Mono<Cat> troublePost(@RequestBody Map<String,Object> someData, Context context) {
         log.info( "Some data is: " + someData.toString() );
 
-        ServiceResponse serviceResponse = context.getResponse();
-        serviceResponse.setStatusCode(555);
-        serviceResponse.setDisplayableMessage( "This is a trouble cat" );
+        ResponseAdvice responseAdvice = context.getResponse();
+        responseAdvice.setStatusCode(555);
+
+        responseAdvice.addDetailCode( new ResponseAdvice.Detail(600, "This is a trouble cat") );
 
         return Mono.just(
                 new Cat("one", "Tonkinese", "Brown", "Trouble", 1 )

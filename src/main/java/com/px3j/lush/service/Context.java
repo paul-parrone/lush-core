@@ -11,6 +11,6 @@ import lombok.*;
 @NoArgsConstructor
 @Data
 public class Context {
-    private ServiceResponse response;
+    private ResponseAdvice response;
     private String traceId;
 }

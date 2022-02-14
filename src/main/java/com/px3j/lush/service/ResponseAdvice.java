@@ -1,36 +1,40 @@
 package com.px3j.lush.service;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Encapsulates the response from an 'API' call.
  *
+ *
  * @author Paul Parrone
  */
 @NoArgsConstructor
-public class ServiceResponse {
+public class ResponseAdvice {
     @Getter @Setter
-    private String requestKey = "";
+    private String traceId = "";
     @Getter @Setter
     private int statusCode = 0;
-    @Getter @Setter
-    private String displayableMessage = "";
+
+    private List<Detail> detail = new ArrayList<>();
     private final Map<String,Object> extras = new HashMap<>();
 
-    public ServiceResponse(String requestKey, int statusCode, String displayableMessage) {
-        this.requestKey = requestKey;
+    public ResponseAdvice(String traceId, int statusCode) {
+        this.traceId = traceId;
         this.statusCode = statusCode;
-        this.displayableMessage = displayableMessage;
     }
 
     public Map<String, Object> getExtras() {
         return Collections.unmodifiableMap(extras);
+    }
+
+    public Collection<Detail> getDetail() {
+        return Collections.unmodifiableList(detail);
+    }
+
+    public void addDetailCode( Detail detail ) {
+        this.detail.add( detail );
     }
 
     /**
@@ -41,5 +45,12 @@ public class ServiceResponse {
      */
     public void putExtra(final String key, final Object value ) {
         this.extras.put( key, value );
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class Detail {
+        private int code;
+        private String message;
     }
 }
