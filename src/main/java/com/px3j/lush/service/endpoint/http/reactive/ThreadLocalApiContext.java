@@ -1,6 +1,6 @@
 package com.px3j.lush.service.endpoint.http.reactive;
 
-import com.px3j.lush.service.Context;
+import com.px3j.lush.service.LushContext;
 
 /**
  * ThreadLocal to contain ApiContext - allows passing from the WebFlux layer into our Aspects
@@ -8,9 +8,9 @@ import com.px3j.lush.service.Context;
  * @author Paul Parrone
  */
 class ThreadLocalApiContext {
-    static ThreadLocal<Context> threadLocal = ThreadLocal.withInitial(CarryingContext::new);
+    static ThreadLocal<LushContext> threadLocal = ThreadLocal.withInitial(CarryingContext::new);
 
-    public static Context get() {
+    public static LushContext get() {
         return threadLocal.get();
     }
 }

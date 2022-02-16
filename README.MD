@@ -1,4 +1,49 @@
 
+####Goals
+* Provide value without getting in the way
+* Provide patterns for common application interactions
+* Provide integrated architecture code for front/back end.
+
+
+* Automatic log tracking.
+* Controller implementation patterns.
+* Exception handling patterns.
+* Integrated front-end portion - carries patterns to UI.
+* Simple well-defined conversation protocol.
+
+
+
+The Lush Framework is built on top of Spring, it is not meant to replace Spring but to augment it - the Spring Framework has a much larger scope.  Think of Lush as the Spring Framework poured through an Application Architecture funnel.
+
+The Lush Framework has a few overarching goals:
+
+* Stay out of the way
+* Provide a set of patterns and/or code to help develop applications
+
+
+ ```text
+Terms: endpoint, result advice, result data...
+
+
+invoke endpoint
+endpoint returns results in form of data and/or advice
+unexpected exceptions are handled automatically
+advice is injected as requested and passed back to the caller automatically
+
+
+```
+
+
+
+####Things to know:
+
+
+Controller
+
+Automatic injection of Context if necessary
+
+
+
 
 
 ####Request Categories
@@ -46,7 +91,7 @@ If the developer of a service endpoint determines that there is a reason that it
 Let's look at an example:
 ```java
     @RequestMapping(value = "updateAge", method = RequestMethod.POST)
-    Mono<Cat> updateAge( @RequestParam int age, Context context )
+    Mono<Cat> updateAge( @RequestParam int age, Context lushContext )
 ```
 
 A couple of things to notice:

@@ -1,4 +1,4 @@
-package com.px3j.lush.illustrator.model;
+package com.px3j.app.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

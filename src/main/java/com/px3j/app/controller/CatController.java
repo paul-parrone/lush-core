@@ -1,11 +1,13 @@
-package com.px3j.lush.illustrator.controller;
+package com.px3j.app.controller;
 
-import com.px3j.lush.service.Context;
-import com.px3j.lush.service.ResponseAdvice;
-import com.px3j.lush.illustrator.model.Cat;
-import com.px3j.lush.illustrator.repository.CatRepository;
+import com.px3j.app.model.Cat;
+import com.px3j.app.repository.CatRepository;
+import com.px3j.lush.core.security.Actor;
+import com.px3j.lush.service.LushContext;
+import com.px3j.lush.service.ResultAdvice;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -18,7 +20,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("cats")
-@CrossOrigin(origins="*", exposedHeaders = {"x-lush-response"} )
+@CrossOrigin(origins="*", exposedHeaders = {"x-lush-advice"} )
 public class CatController  {
     private final CatRepository repository;
 
@@ -50,13 +52,14 @@ public class CatController  {
     }
 
     @RequestMapping(value = "troublePost", method = RequestMethod.POST)
-    public Mono<Cat> troublePost(@RequestBody Map<String,Object> someData, Context context) {
+    public Mono<Cat> troublePost(@RequestBody Map<String,Object> someData, LushContext lushContext, Actor actor) {
         log.info( "Some data is: " + someData.toString() );
+        log.info( "ACTOR IS: " + actor.toString() );
 
-        ResponseAdvice responseAdvice = context.getResponse();
-        responseAdvice.setStatusCode(555);
+        ResultAdvice resultAdvice = lushContext.getAdvice();
+        resultAdvice.setStatusCode(555);
 
-        responseAdvice.addDetailCode( new ResponseAdvice.Detail(600, "This is a trouble cat") );
+        resultAdvice.addResultDetail( new ResultAdvice.ResultDetail(600, Map.of("message", "This is a trouble cat") ));
 
         return Mono.just(
                 new Cat("one", "Tonkinese", "Brown", "Trouble", 1 )

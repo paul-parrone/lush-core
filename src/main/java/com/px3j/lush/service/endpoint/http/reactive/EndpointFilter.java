@@ -1,6 +1,6 @@
 package com.px3j.lush.service.endpoint.http.reactive;
 
-import com.px3j.lush.service.ResponseAdvice;
+import com.px3j.lush.service.ResultAdvice;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.sleuth.Tracer;
@@ -28,12 +28,12 @@ public class EndpointFilter implements WebFilter {
     @Override
     public Mono<Void> filter(final ServerWebExchange exchange, WebFilterChain webFilterChain) {
         final String requestKey = generateTraceId();
-        ResponseAdvice response = new ResponseAdvice(requestKey, 200);
+        ResultAdvice response = new ResultAdvice(requestKey, 200);
 
         // Set up the thread local ApiContext object - this will be used by the decorator to handle the reqeust/response
         CarryingContext context = (CarryingContext) ThreadLocalApiContext.get();
         context.setTraceId( requestKey );
-        context.setResponse( response );
+        context.setAdvice( response );
         context.setExchange( exchange );
 
         return webFilterChain.filter(exchange);

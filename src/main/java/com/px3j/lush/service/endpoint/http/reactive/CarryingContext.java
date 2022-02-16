@@ -1,6 +1,6 @@
 package com.px3j.lush.service.endpoint.http.reactive;
 
-import com.px3j.lush.service.Context;
+import com.px3j.lush.service.LushContext;
 import lombok.Getter;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -10,7 +10,7 @@ import org.springframework.web.server.ServerWebExchange;
  *
  * @author Paul Parrone
  */
-class CarryingContext extends Context {
+class CarryingContext extends LushContext {
     @Getter
     ServerWebExchange exchange;
 
