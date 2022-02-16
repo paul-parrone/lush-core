@@ -1,9 +1,9 @@
 package com.px3j.app.sim;
 
 import com.google.gson.Gson;
-import com.px3j.app.repository.PassportRepository;
+import com.px3j.lush.core.repository.PassportRepository;
 import com.px3j.lush.core.security.Actor;
-import com.px3j.lush.service.endpoint.http.security.reactive.Passport;
+import com.px3j.lush.core.security.Passport;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

@@ -21,6 +21,8 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 import java.util.Map;
 
+import static com.px3j.lush.service.endpoint.http.Constants.WHO_HEADER_NAME;
+
 @SpringBootTest( classes={IncubatorApplication.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Slf4j
@@ -36,12 +38,6 @@ public class LushTests {
                 .build();
     }
 
-    private String actorAsJson() {
-        Actor actor = new Actor("lush", "password", List.of(new SimpleGrantedAuthority("user")));
-        String json = new Gson().toJson(actor);
-        return json;
-    }
-
     @Test
     public void test_findOne() {
         repository.deleteAll().block();
@@ -51,11 +47,15 @@ public class LushTests {
         Cat finder = new Cat();
         finder.setName( "Gumball" );
 
+        String token = login("paul");
+
         webTestClient
                 .post()
                 .uri("/cats/findOne" )
                 .accept(MediaType.APPLICATION_JSON)
-                .header( "x-lush-who", actorAsJson() )
+                .headers( httpHeaders -> {
+                    httpHeaders.put( WHO_HEADER_NAME, List.of(token));
+                })
                 .body( Mono.just(finder), Cat.class )
 
                 .exchange()
@@ -69,10 +69,14 @@ public class LushTests {
         repository.save( new Cat(null, "Tonkinese", "Brown", "Gumball", 1) ).block();
         repository.save( new Cat(null, "Tonkinese", "Blue", "Sneeb", 1) ).block();
 
+        String token = login("paul");
+
         webTestClient
                 .get()
                 .uri("/cats/findAll" )
-                .header( "x-lush-who", actorAsJson() )
+                .headers( httpHeaders -> {
+                    httpHeaders.put( WHO_HEADER_NAME, List.of(token));
+                })
                 .exchange()
                 .expectBodyList(Cat.class)
                 .hasSize(2)
@@ -82,15 +86,40 @@ public class LushTests {
 
     @Test
     public void test_trouble() {
+        String token = login("paul");
+
         webTestClient
                 .get()
                 .uri("/cats/findFail" )
                 .accept(MediaType.APPLICATION_JSON)
-                .header( "x-lush-who", actorAsJson() )
+                .headers( httpHeaders -> {
+                    httpHeaders.put( WHO_HEADER_NAME, List.of(token));
+                })
+                .exchange()
+                .expectHeader().value(
+                        Constants.ADVICE_HEADER_NAME,
+                        h -> log.info(h.toString())
+                );
+//                .expectBody(Map.class)
+//                .value( m -> log.info(m.toString()) );
+    }
+
+    @Test
+    public void test_troublePost() {
+        String token = login("paul");
+
+        webTestClient
+                .post()
+                .uri("/cats/troublePost" )
+                .accept(MediaType.APPLICATION_JSON)
+                .headers( httpHeaders -> {
+                    httpHeaders.put( WHO_HEADER_NAME, List.of(token));
+                })
+                .body( Mono.just(Map.of("a","b")), Map.class )
 
                 .exchange()
                 .expectHeader().value(
-                        Constants.RESPONSE_HEADER_NAME,
+                        Constants.ADVICE_HEADER_NAME,
                         h -> log.info(h.toString())
                 );
 //                .expectBody(Map.class)
@@ -107,28 +136,5 @@ public class LushTests {
                 .exchange()
                 .returnResult(String.class)
                 .getResponseBody().blockFirst();
-    }
-
-    @Test
-    public void test_troublePost() {
-        String token = login("paul");
-        System.out.println("token = " + token);
-
-        webTestClient
-                .post()
-                .uri("/cats/troublePost" )
-                .accept(MediaType.APPLICATION_JSON)
-                .headers( httpHeaders -> {
-                    httpHeaders.put( "x-lush-who", List.of(token));
-                })
-                .body( Mono.just(Map.of("a","b")), Map.class )
-
-                .exchange()
-                .expectHeader().value(
-                        Constants.RESPONSE_HEADER_NAME,
-                        h -> log.info(h.toString())
-                );
-//                .expectBody(Map.class)
-//                .value( m -> log.info(m.toString()) );
     }
 }

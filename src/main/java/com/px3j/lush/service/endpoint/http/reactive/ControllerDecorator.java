@@ -6,7 +6,7 @@ import com.px3j.lush.core.security.Actor;
 import com.px3j.lush.service.LushContext;
 import com.px3j.lush.service.ResultAdvice;
 import com.px3j.lush.service.endpoint.http.Constants;
-import com.px3j.lush.service.endpoint.http.security.reactive.Passport;
+import com.px3j.lush.core.security.Passport;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -144,7 +144,7 @@ public class ControllerDecorator {
         context.getExchange()
                 .getResponse()
                 .getHeaders()
-                .add( Constants.RESPONSE_HEADER_NAME, new Gson().toJson(context.getAdvice()) );
+                .add( Constants.ADVICE_HEADER_NAME, new Gson().toJson(context.getAdvice()) );
     }
 
     private Method getMethodBeingCalled(ProceedingJoinPoint pjp ) throws NoSuchMethodException, SecurityException {

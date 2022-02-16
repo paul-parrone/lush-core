@@ -1,4 +1,4 @@
-package com.px3j.lush.service.endpoint.http.security.reactive;
+package com.px3j.lush.core.security;
 
 import com.px3j.lush.core.security.Actor;
 import lombok.Getter;

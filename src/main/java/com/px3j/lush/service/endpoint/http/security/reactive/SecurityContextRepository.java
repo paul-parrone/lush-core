@@ -3,9 +3,9 @@ package com.px3j.lush.service.endpoint.http.security.reactive;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import com.px3j.app.repository.PassportRepository;
+import com.px3j.lush.core.security.Passport;
+import com.px3j.lush.service.endpoint.http.Constants;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
@@ -20,10 +20,6 @@ import java.util.List;
 @Component
 @Slf4j
 public class SecurityContextRepository implements ServerSecurityContextRepository {
-
-    @Autowired
-    private PassportRepository passportRepository;
-
     @Override
     public Mono<Void> save(ServerWebExchange exchange, SecurityContext context) {
         return Mono.empty();
@@ -31,7 +27,7 @@ public class SecurityContextRepository implements ServerSecurityContextRepositor
 
     @Override
     public Mono<SecurityContext> load(ServerWebExchange exchange) {
-        List<String> whoList = exchange.getRequest().getHeaders().get("x-lush-who");
+        List<String> whoList = exchange.getRequest().getHeaders().get(Constants.WHO_HEADER_NAME);
 
         // Header isn't available, deny access...
         if(whoList == null || whoList.isEmpty()) {
@@ -56,15 +52,4 @@ public class SecurityContextRepository implements ServerSecurityContextRepositor
             return Mono.empty();
         }
     }
-
-    /*
-        return entryTicketRepository
-                .findById( whoAsJson )
-                .doOnNext( entryTicket -> {
-                    entryTicket.setAuthenticated( true );
-                    log.info( "FOUND USER" );
-                })
-                .map(SecurityContextImpl::new);
-*/
-
 }
