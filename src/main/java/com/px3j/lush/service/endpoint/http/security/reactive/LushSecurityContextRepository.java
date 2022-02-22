@@ -19,7 +19,7 @@ import java.util.List;
 
 @Component
 @Slf4j
-public class SecurityContextRepository implements ServerSecurityContextRepository {
+public class LushSecurityContextRepository implements ServerSecurityContextRepository {
     @Override
     public Mono<Void> save(ServerWebExchange exchange, SecurityContext context) {
         return Mono.empty();
@@ -43,9 +43,10 @@ public class SecurityContextRepository implements ServerSecurityContextRepositor
             final String decodedJson = new String(Base64.getDecoder().decode(whoAsJson.getBytes(StandardCharsets.UTF_8)));
 
             Passport passport = gson.fromJson( decodedJson, Passport.class);
-            passport.setAuthenticated( true );
+            PassportAuthenticationToken authToken = new PassportAuthenticationToken(passport);
+            authToken.setAuthenticated(true);
 
-            return Mono.just( new SecurityContextImpl(passport) );
+            return Mono.just( new SecurityContextImpl(authToken) );
         }
         catch (JsonSyntaxException e) {
             log.warn( "Invalid JSON in ticket header" );

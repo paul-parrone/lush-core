@@ -1,67 +1,39 @@
 package com.px3j.lush.core.security;
 
-import com.px3j.lush.core.security.Actor;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 @Document(collection = "passports")
-public class Passport implements Authentication {
+public class Passport {
     @Id
     @Getter @Setter
     private String id;
     @Getter @Setter
-    private final Actor actor;
+    private String username = "";
     @Getter @Setter
-    private boolean isAuthenticated;
+    private String password = "";
+    @Getter @Setter
+    private Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
 
     public Passport() {
         this.id = null;
-        this.actor = null;
-        this.isAuthenticated = false;
     }
 
-    public Passport(Actor actor) {
-        this.actor = actor;
+    public Passport(String username, String password, Collection<SimpleGrantedAuthority> authorities) {
+        this.username = username;
+        this.password = password;
+        this.authorities = authorities;
     }
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return actor.getAuthorities();
+    public void populateFrom( Passport other ) {
+        BeanUtils.copyProperties( other, this );
     }
 
-    @Override
-    public Object getCredentials() {
-        return null;
-    }
-
-    @Override
-    public Object getDetails() {
-        return null;
-    }
-
-    @Override
-    public Object getPrincipal() {
-        return actor;
-    }
-
-    @Override
-    public boolean isAuthenticated() {
-        return isAuthenticated;
-    }
-
-    @Override
-    public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
-        this.isAuthenticated = isAuthenticated;
-    }
-
-    @Override
-    public String getName() {
-        return actor.getUsername();
-    }
 }

@@ -1,4 +1,60 @@
+####Thoughts?
+* Passport service?
+* Apache Apisix?
+* JWT/Basic -> Gateway -> Passport -> Microservice
+* 
 
+####Roadmap
+1. Scope Lush (at least what want to show)
+2. Implement it
+3. Create Maven archetype
+4. Document it (iterative)
+5. Decide on an illustrative project
+6. Implement the project
+7. Document it
+8. Deploy it
+
+
+###Integrations
+####Zipkin
+docker pull openzipkin/zipkin
+docker run -d -p 9411:9411 openzipkin/zipkin
+
+####Logstash JSON
+
+####ELK
+[ELK prerequisites](https://github.com/elastic/stack-docker#prerequisites)
+
+*Make sure Docker VM has 4gb (Docker Desktop Settings)*
+
+```shell
+docker network create lush-dev
+
+docker pull logstash:8.0.0
+docker run -d --name logstash --net lush-dev -p 5601:5601 logstash:8.0.0
+
+docker run --name logstash --net lush-dev --rm -it -v ~/docker/logstash/pipeline:/usr/share/logstash/pipeline/ -v ~/docker/logstash/logs:/usr/share/logstash/logs/ docker.elastic.co/logstash/logstash:8.0.0
+
+docker pull kibana:8.0.0
+docker run -d --name kibana --net lush-dev -p 5601:5601 kibana:8.0.0
+
+docker pull elasticsearch:8.0.0
+docker run -d --name elasticsearch --net lush-dev -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elasticsearch:8.0.0
+```
+
+[Kibana](http://localhost:5601)
+[Spring Boot Admin](http://localhost:9090/wallboard)
+
+
+
+####Scope
+* Normal endpoint behavior
+* Security (passport)
+* Sleuth logging
+* Runnable tests (simple)
+* 
+
+ 
 ####Goals
 * Provide value without getting in the way
 * Provide patterns for common application interactions

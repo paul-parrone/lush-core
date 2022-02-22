@@ -15,6 +15,12 @@ import java.io.StringWriter;
  * @author Paul P. Parrone Jr.
  */
 public class StackTraceToLoggerWriter extends PrintWriter {
+    private int noiseCounter = 0;
+    private final int noiseMax = 3;
+
+    private int skipCounter = 0;
+    private final int skipMax = 10;
+
     /**
      * Constructor.
      *
@@ -27,9 +33,30 @@ public class StackTraceToLoggerWriter extends PrintWriter {
 
     @Override
     public void print(String s) {
-        StringBuffer lMsg = new StringBuffer( "    " );
-        lMsg.append( s );
-        _logger.error( lMsg.toString() );
+        StringBuffer lMsg = new StringBuffer( "   " );
+
+        if( s.contains("org.springframework") || s.contains("reactor.core") ) {
+            noiseCounter++;
+            if( noiseCounter >= noiseMax) {
+                if( skipCounter++ == 0 ) {
+                    _logger.error( "          ** skipped **" );
+                }
+            }
+            else {
+                lMsg.append( s );
+                _logger.error( lMsg.toString() );
+            }
+
+            // Reset the counters...
+            if( skipCounter >= skipMax ) {
+                skipCounter = noiseCounter = 0;
+            }
+        }
+        else {
+            skipCounter = noiseCounter = 0;
+            lMsg.append( s );
+            _logger.error( lMsg.toString() );
+        }
     }
 
     /**

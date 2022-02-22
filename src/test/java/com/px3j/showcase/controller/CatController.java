@@ -1,13 +1,12 @@
-package com.px3j.app.controller;
+package com.px3j.showcase.controller;
 
-import com.px3j.app.model.Cat;
-import com.px3j.app.repository.CatRepository;
-import com.px3j.lush.core.security.Actor;
-import com.px3j.lush.service.LushContext;
-import com.px3j.lush.service.ResultAdvice;
+import com.px3j.lush.core.security.Passport;
+import com.px3j.showcase.model.Cat;
+import com.px3j.showcase.repository.CatRepository;
+import com.px3j.lush.core.LushContext;
+import com.px3j.lush.core.ResultAdvice;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -52,9 +51,9 @@ public class CatController  {
     }
 
     @RequestMapping(value = "troublePost", method = RequestMethod.POST)
-    public Mono<Cat> troublePost(@RequestBody Map<String,Object> someData, LushContext lushContext, Actor actor) {
+    public Mono<Cat> troublePost(@RequestBody Map<String,Object> someData, LushContext lushContext, Passport passport) {
         log.info( "Some data is: " + someData.toString() );
-        log.info( "ACTOR IS: " + actor.toString() );
+        log.info( "Passport is: " + passport.toString() );
 
         ResultAdvice resultAdvice = lushContext.getAdvice();
         resultAdvice.setStatusCode(555);

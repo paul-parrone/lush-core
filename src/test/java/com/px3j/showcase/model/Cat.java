@@ -1,4 +1,4 @@
-package com.px3j.app.model;
+package com.px3j.showcase.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

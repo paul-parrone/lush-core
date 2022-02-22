@@ -1,6 +1,6 @@
-package com.px3j.app.repository;
+package com.px3j.showcase.repository;
 
-import com.px3j.app.model.Cat;
+import com.px3j.showcase.model.Cat;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import reactor.core.publisher.Mono;
 

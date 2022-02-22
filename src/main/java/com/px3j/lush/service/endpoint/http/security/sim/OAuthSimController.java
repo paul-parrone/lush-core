@@ -1,8 +1,8 @@
-package com.px3j.app.sim;
+package com.px3j.lush.service.endpoint.http.security.sim;
 
 import com.google.gson.Gson;
-import com.px3j.lush.core.repository.PassportRepository;
-import com.px3j.lush.core.security.Actor;
+
+import com.px3j.lush.service.endpoint.http.security.reactive.PassportRepository;
 import com.px3j.lush.core.security.Passport;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,10 +33,10 @@ public class OAuthSimController {
         String user = params.get("user");
         log.info( "Simulated login of user: " + user);
 
-        Actor actor = new Actor(user == null ? "unknown" : user, "", List.of(new SimpleGrantedAuthority("user")));
-        Base64.getEncoder().encode( new Gson().toJson(new Passport(actor)).getBytes(StandardCharsets.UTF_8) );
+        Passport passport = new Passport( "demo", "", List.of(new SimpleGrantedAuthority("user")) );
+        Base64.getEncoder().encode( new Gson().toJson(passport).getBytes(StandardCharsets.UTF_8) );
 
-        Mono<Passport> ticketMono = passportRepository.save(new Passport(actor));
+        Mono<Passport> ticketMono = passportRepository.save(passport);
         return ticketMono.map( t -> {
             String asJson = new Gson().toJson(t);
             return new String(Base64.getEncoder().encode( asJson.getBytes(StandardCharsets.UTF_8) ));

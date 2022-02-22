@@ -1,4 +1,4 @@
-package com.px3j.lush.service;
+package com.px3j.lush.core;
 
 import lombok.*;
 

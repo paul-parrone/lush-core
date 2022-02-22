@@ -1,6 +1,6 @@
 package com.px3j.lush.service.endpoint.http.reactive;
 
-import com.px3j.lush.service.ResultAdvice;
+import com.px3j.lush.core.ResultAdvice;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.sleuth.Tracer;

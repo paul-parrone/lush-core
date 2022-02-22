@@ -2,9 +2,8 @@ package com.px3j.lush.service.endpoint.http.reactive;
 
 import com.google.gson.Gson;
 import com.px3j.lush.core.exception.StackTraceToLoggerWriter;
-import com.px3j.lush.core.security.Actor;
-import com.px3j.lush.service.LushContext;
-import com.px3j.lush.service.ResultAdvice;
+import com.px3j.lush.core.LushContext;
+import com.px3j.lush.core.ResultAdvice;
 import com.px3j.lush.service.endpoint.http.Constants;
 import com.px3j.lush.core.security.Passport;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +22,11 @@ import reactor.core.publisher.Mono;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
+/**
+ * Aspect that will intercept calls to Lush based controllers.
+ *
+ * @author Paul Parrone
+ */
 @Slf4j
 @Aspect
 @Component()
@@ -37,42 +41,50 @@ public class ControllerDecorator {
     @Around("execution(public reactor.core.publisher.Mono com.px3j..controller..*(..))")
     public Mono monoInvocationAdvice(ProceedingJoinPoint pjp) {
         return ReactiveSecurityContextHolder.getContext()
-                .map( sc -> (Passport)sc.getAuthentication() )
+                .map( sc -> (Passport) sc.getAuthentication().getPrincipal() )
                 .map(passport -> {
-                    Actor actor = passport.getActor();
-                    MDC.put( "username", actor.getUsername() );
-                    return actor;
+                    MDC.put( "username", passport.getUsername() );
+                    return passport;
                 })
-                .flatMap( (actor) -> (Mono)decoratorImpl(pjp, actor,false) );
+                .flatMap( (passport) -> (Mono)decoratorImpl(pjp, passport,false) );
     }
 
     @Around("execution(public reactor.core.publisher.Flux com.px3j..controller..*(..))")
     public Flux fluxInvocationAdvice(ProceedingJoinPoint pjp) {
         return ReactiveSecurityContextHolder.getContext()
-                .map( sc -> (Passport)sc.getAuthentication() )
+                .map( sc -> (Passport) sc.getAuthentication().getPrincipal() )
                 .map(passport -> {
-                    Actor actor = passport.getActor();
-                    MDC.put( "username", actor.getUsername() );
-                    return actor;
+                    MDC.put( "username", passport.getUsername() );
+                    return passport;
                 })
-                .flatMapMany( (actor) -> (Flux)decoratorImpl(pjp, actor,true) );
+                .flatMapMany( (passport) -> (Flux)decoratorImpl(pjp, passport,true) );
     }
 
-    private Object decoratorImpl(ProceedingJoinPoint pjp, Actor actor, boolean fluxOnError ) {
+    private Object decoratorImpl(ProceedingJoinPoint pjp, Passport passport, boolean fluxOnError ) {
+        if( log.isDebugEnabled() ) {
+            log.debug( "START: Lush interception" );
+        }
+
         CarryingContext apiContext = (CarryingContext)ThreadLocalApiContext.get();
 
         try {
+            // Get the target method from the join point, use this to inject parameters.
             Method method = getMethodBeingCalled(pjp);
 
-            injectLushContext(method, pjp, apiContext);
-            injectActor( method, pjp, actor );
+            // If the method declares an argument of LushContext, inject it (we inject it by copying the values)
+            injectLushContext( method, pjp, apiContext );
+            // If the method declares an argument of Passport, inject it (we inject it by copying the values)
+            injectPassport( method, pjp, passport );
 
+            // Invoke the target method
             Object returnValue = pjp.proceed();
+
+            // Add the Lush response header
             addResponseHeader( apiContext );
             return returnValue;
         }
 
-        // Catch all error handler.  Simply returns an error Mono or Flux
+        // Catch all error handler.  Returns an empty Mono or Flux
         catch (final Throwable throwable) {
             throwable.printStackTrace( new StackTraceToLoggerWriter(log) );
 
@@ -83,13 +95,18 @@ public class ControllerDecorator {
             addResponseHeader( apiContext );
             return fluxOnError ? Flux.empty() : Mono.empty();
         }
+        finally {
+            if( log.isDebugEnabled() ) {
+                log.debug( "END: Lush interception" );
+            }
+        }
     }
 
-    private void injectActor( Method method, ProceedingJoinPoint pjp, Actor actor ) {
-        findArgumentIndex( method, Actor.class )
+    private void injectPassport(Method method, ProceedingJoinPoint pjp, Passport passport ) {
+        findArgumentIndex( method, Passport.class )
                 .ifPresent( (i) -> {
-                    Actor contextArg = (Actor) pjp.getArgs()[i];
-                    contextArg.populateFrom( actor );
+                    Passport contextArg = (Passport) pjp.getArgs()[i];
+                    contextArg.populateFrom( passport );
                 });
     }
 

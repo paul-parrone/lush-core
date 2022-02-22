@@ -1,27 +1,32 @@
-package com.px3j.app;
+package com.px3j.showcase;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.px3j.app.model.Cat;
-import com.px3j.app.repository.CatRepository;
+import com.px3j.showcase.model.Cat;
+import com.px3j.showcase.repository.CatRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories;
 
 import javax.annotation.PostConstruct;
 
 @SpringBootApplication
+@EnableReactiveMongoRepositories({
+        "com.px3j.showcase",
+        "com.px3j.lush"
+})
 @ComponentScan({
         "com.px3j.lush.service.endpoint.http.reactive",
         "com.px3j.lush.service.endpoint.http.security.reactive",
-        "com.px3j.app"
+        "com.px3j.showcase"
 })
-public class IncubatorApplication {
+public class ShowcaseApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(IncubatorApplication.class, args);
+        SpringApplication.run(ShowcaseApplication.class, args);
     }
 
     @Autowired

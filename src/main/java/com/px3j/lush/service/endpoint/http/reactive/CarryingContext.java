@@ -1,6 +1,6 @@
 package com.px3j.lush.service.endpoint.http.reactive;
 
-import com.px3j.lush.service.LushContext;
+import com.px3j.lush.core.LushContext;
 import lombok.Getter;
 import org.springframework.web.server.ServerWebExchange;
 
