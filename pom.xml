@@ -52,10 +52,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb-reactive</artifactId>
-        </dependency>
 
         <!-- Spring Boot Admin Client Dependencies -->
         <dependency>
@@ -107,7 +103,6 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <dependencyManagement>
@@ -146,11 +141,13 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <dependencies>
+<!--
                 <dependency>
                     <groupId>de.flapdoodle.embed</groupId>
                     <artifactId>de.flapdoodle.embed.mongo</artifactId>
                     <version>3.3.1</version>
                 </dependency>
+-->
             </dependencies>
         </profile>
     </profiles>

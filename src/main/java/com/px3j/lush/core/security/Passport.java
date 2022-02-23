@@ -1,25 +1,19 @@
 package com.px3j.lush.core.security;
 
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-@Document(collection = "passports")
+@Data
 public class Passport {
-    @Id
-    @Getter @Setter
     private String id;
-    @Getter @Setter
     private String username = "";
-    @Getter @Setter
     private String password = "";
-    @Getter @Setter
     private Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
 
     public Passport() {
@@ -35,5 +29,4 @@ public class Passport {
     public void populateFrom( Passport other ) {
         BeanUtils.copyProperties( other, this );
     }
-
 }
