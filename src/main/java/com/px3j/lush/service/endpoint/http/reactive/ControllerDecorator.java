@@ -14,6 +14,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.sleuth.Tracer;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
@@ -158,10 +159,12 @@ public class ControllerDecorator {
      * @param context The context holding the ResponseAdvice to add to the HTTP response header.
      */
     private void addResponseHeader( CarryingContext context ) {
-        context.getExchange()
+        HttpHeaders headers = context.getExchange()
                 .getResponse()
-                .getHeaders()
-                .add( Constants.ADVICE_HEADER_NAME, new Gson().toJson(context.getAdvice()) );
+                .getHeaders();
+
+        headers.add( "Access-Control-Expose-Headers", Constants.ADVICE_HEADER_NAME);
+        headers.add( Constants.ADVICE_HEADER_NAME, new Gson().toJson(context.getAdvice()) );
     }
 
     private Method getMethodBeingCalled(ProceedingJoinPoint pjp ) throws NoSuchMethodException, SecurityException {
