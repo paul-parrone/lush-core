@@ -39,7 +39,7 @@ public class ControllerDecorator {
         this.tracer = tracer;
     }
 
-    @Around("execution(public reactor.core.publisher.Mono com.px3j..controller..*(..))")
+    @Around("execution(public reactor.core.publisher.Mono com..lush..controller..*(..))")
     public Mono monoInvocationAdvice(ProceedingJoinPoint pjp) {
         return ReactiveSecurityContextHolder.getContext()
                 .map( sc -> (Passport) sc.getAuthentication().getPrincipal() )
@@ -50,7 +50,7 @@ public class ControllerDecorator {
                 .flatMap( (passport) -> (Mono)decoratorImpl(pjp, passport,false) );
     }
 
-    @Around("execution(public reactor.core.publisher.Flux com.px3j..controller..*(..))")
+    @Around("execution(public reactor.core.publisher.Flux com..lush..controller..*(..))")
     public Flux fluxInvocationAdvice(ProceedingJoinPoint pjp) {
         return ReactiveSecurityContextHolder.getContext()
                 .map( sc -> (Passport) sc.getAuthentication().getPrincipal() )
