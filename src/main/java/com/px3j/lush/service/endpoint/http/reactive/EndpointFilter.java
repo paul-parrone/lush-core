@@ -1,14 +1,19 @@
 package com.px3j.lush.service.endpoint.http.reactive;
 
+import com.google.gson.Gson;
 import com.px3j.lush.core.ResultAdvice;
+import com.px3j.lush.service.endpoint.http.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.sleuth.Tracer;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
+
+import java.util.Optional;
 
 /**
  * Filter that will set up each request for consumption down the line.
@@ -28,13 +33,23 @@ public class EndpointFilter implements WebFilter {
     @Override
     public Mono<Void> filter(final ServerWebExchange exchange, WebFilterChain webFilterChain) {
         final String requestKey = generateTraceId();
-        ResultAdvice response = new ResultAdvice(requestKey, 200);
+        final ResultAdvice advice = new ResultAdvice(requestKey, 200);
 
-        // Set up the thread local ApiContext object - this will be used by the decorator to handle the reqeust/response
+        // Set up the thread local ApiContext object - this will be used by the decorator to handle the reqeust
+        // and response advice
         CarryingContext context = (CarryingContext) ThreadLocalApiContext.get();
         context.setTraceId( requestKey );
-        context.setAdvice( response );
+        context.setAdvice( advice );
         context.setExchange( exchange );
+
+        // Setup the exchange to add the advice response header once the controller method has returned.
+        //
+        exchange.getResponse().beforeCommit( () -> {
+                    return Mono.deferContextual(Mono::just).doOnNext(ctx -> {
+                        exchange.getResponse().getHeaders()
+                                .add( Constants.ADVICE_HEADER_NAME, new Gson().toJson(context.getAdvice()));
+                    }).then();
+        });
 
         return webFilterChain.filter(exchange);
     }

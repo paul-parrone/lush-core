@@ -78,11 +78,7 @@ public class ControllerDecorator {
             injectPassport( method, pjp, passport );
 
             // Invoke the target method
-            Object returnValue = pjp.proceed();
-
-            // Add the Lush response header
-            addResponseHeader( apiContext );
-            return returnValue;
+            return pjp.proceed();
         }
 
         // Catch all error handler.  Returns an empty Mono or Flux
@@ -93,7 +89,6 @@ public class ControllerDecorator {
             advice.setStatusCode( -999 );
             advice.putExtra( "isUnexpectedException", true );
 
-            addResponseHeader( apiContext );
             return fluxOnError ? Flux.empty() : Mono.empty();
         }
         finally {
@@ -153,20 +148,6 @@ public class ControllerDecorator {
         return Optional.empty();
     }
 
-    /**
-     * Helper method to add the response instance to the response header.
-     *
-     * @param context The context holding the ResponseAdvice to add to the HTTP response header.
-     */
-    private void addResponseHeader( CarryingContext context ) {
-        HttpHeaders headers = context.getExchange()
-                .getResponse()
-                .getHeaders();
-
-        headers.add( "Access-Control-Expose-Headers", Constants.ADVICE_HEADER_NAME);
-        headers.add( Constants.ADVICE_HEADER_NAME, new Gson().toJson(context.getAdvice()) );
-    }
-
     private Method getMethodBeingCalled(ProceedingJoinPoint pjp ) throws NoSuchMethodException, SecurityException {
         MethodSignature signature = (MethodSignature)pjp.getSignature();
         Method method = signature.getMethod();
@@ -177,5 +158,4 @@ public class ControllerDecorator {
 
         return pjp.getTarget().getClass().getDeclaredMethod( signature.getName(), method.getParameterTypes() );
     }
-
 }
