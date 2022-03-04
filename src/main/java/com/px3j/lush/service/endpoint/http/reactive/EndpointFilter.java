@@ -13,7 +13,6 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
-import java.util.Optional;
 
 /**
  * Filter that will set up each request for consumption down the line.
@@ -43,11 +42,11 @@ public class EndpointFilter implements WebFilter {
         context.setExchange( exchange );
 
         // Setup the exchange to add the advice response header once the controller method has returned.
-        //
         exchange.getResponse().beforeCommit( () -> {
                     return Mono.deferContextual(Mono::just).doOnNext(ctx -> {
-                        exchange.getResponse().getHeaders()
-                                .add( Constants.ADVICE_HEADER_NAME, new Gson().toJson(context.getAdvice()));
+                        HttpHeaders headers = exchange.getResponse().getHeaders();
+                        headers.add( "Access-Control-Expose-Headers", Constants.ADVICE_HEADER_NAME );
+                        headers.add( Constants.ADVICE_HEADER_NAME, new Gson().toJson(context.getAdvice()));
                     }).then();
         });
 
