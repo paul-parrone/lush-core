@@ -5,6 +5,12 @@ import com.px3j.lush.core.exception.LushException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Glorified Map with factory method to create from a list of key/value pairs.  Can be used when there is no desire to
+ * create a POJO for some data.
+ *
+ * @author paul
+ */
 public class AnyModel extends HashMap<String, Object> {
     public AnyModel(Map<String, Object> m) {
         super(m);

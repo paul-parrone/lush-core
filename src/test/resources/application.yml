@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: lush-app
+
+  sleuth:
+    baggage:
+      local-fields:
+        - lush-user-name
+      remote-fields:
+        - lush-user-name
+      correlation-enabled: true
+      correlation-fields:
+        - lush-user-name
+      tag-fields:
+        - lush-user-name
+
+logging:
+  level:
+    root: INFO
+#    org.springframework.web: DEBUG
+    com.px3j.lush: DEBUG
+
+lush:
+  security:
+    # NOTE: do not put a space after the comma as Spring does not trim it...
+    protected-paths: /lush/app/**
+    public-paths: /actuator/**, /health/**

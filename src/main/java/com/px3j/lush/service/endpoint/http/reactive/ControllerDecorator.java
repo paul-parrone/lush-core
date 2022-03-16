@@ -1,20 +1,19 @@
 package com.px3j.lush.service.endpoint.http.reactive;
 
-import com.google.gson.Gson;
+import brave.baggage.BaggageField;
+import com.px3j.lush.core.Advice;
 import com.px3j.lush.core.exception.StackTraceToLoggerWriter;
 import com.px3j.lush.core.LushContext;
-import com.px3j.lush.core.ResultAdvice;
-import com.px3j.lush.service.endpoint.http.Constants;
 import com.px3j.lush.core.security.Passport;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.reactivestreams.Publisher;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.sleuth.Tracer;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
@@ -33,10 +32,12 @@ import java.util.Optional;
 @Component()
 public class ControllerDecorator {
     private final Tracer tracer;
+    private final BaggageField lushUserNameField;
 
     @Autowired
-    public ControllerDecorator(Tracer tracer ) {
+    public ControllerDecorator(Tracer tracer, BaggageField lushUserNameField) {
         this.tracer = tracer;
+        this.lushUserNameField = lushUserNameField;
     }
 
     @Around("execution(public reactor.core.publisher.Mono com..lush..controller..*(..))")
@@ -44,7 +45,8 @@ public class ControllerDecorator {
         return ReactiveSecurityContextHolder.getContext()
                 .map( sc -> (Passport) sc.getAuthentication().getPrincipal() )
                 .map(passport -> {
-                    MDC.put( "username", passport.getUsername() );
+//                    MDC.put( "username", passport.getUsername() );
+                    lushUserNameField.updateValue(passport.getUsername());
                     return passport;
                 })
                 .flatMap( (passport) -> (Mono)decoratorImpl(pjp, passport,false) );
@@ -55,7 +57,8 @@ public class ControllerDecorator {
         return ReactiveSecurityContextHolder.getContext()
                 .map( sc -> (Passport) sc.getAuthentication().getPrincipal() )
                 .map(passport -> {
-                    MDC.put( "username", passport.getUsername() );
+//                    MDC.put( "username", passport.getUsername() );
+                    lushUserNameField.updateValue(passport.getUsername());
                     return passport;
                 })
                 .flatMapMany( (passport) -> (Flux)decoratorImpl(pjp, passport,true) );
@@ -63,7 +66,7 @@ public class ControllerDecorator {
 
     private Object decoratorImpl(ProceedingJoinPoint pjp, Passport passport, boolean fluxOnError ) {
         if( log.isDebugEnabled() ) {
-            log.debug( "START: Lush interception" );
+            log.debug( "vvvvvv" );
         }
 
         CarryingContext apiContext = (CarryingContext)ThreadLocalApiContext.get();
@@ -77,24 +80,56 @@ public class ControllerDecorator {
             // If the method declares an argument of Passport, inject it (we inject it by copying the values)
             injectPassport( method, pjp, passport );
 
-            // Invoke the target method
-            return pjp.proceed();
+            // Invoke the target method wrapped in a publisher so we can handle exceptions
+            // when necessary...
+            if( fluxOnError ) {
+                return Flux.from((Publisher<?>) pjp.proceed())
+                        .onErrorResume( throwable -> {
+                            errorHandler(apiContext, throwable);
+                            return Flux.empty();
+                        })
+                        .doOnComplete( () -> {
+                            if( log.isDebugEnabled() ) {
+                                log.debug( "^^^^^^" );
+                            }
+                        });
+            }
+            else {
+                return Mono.from((Publisher<?>) pjp.proceed())
+                        .onErrorResume( throwable -> {
+                            errorHandler(apiContext, throwable);
+                            return Mono.empty();
+                        })
+                        .doOnSuccess( o -> {
+                            if( log.isDebugEnabled() ) {
+                                log.debug( "^^^^^^" );
+                            }
+                        });
+
+            }
         }
 
         // Catch all error handler.  Returns an empty Mono or Flux
         catch (final Throwable throwable) {
             throwable.printStackTrace( new StackTraceToLoggerWriter(log) );
 
-            ResultAdvice advice = apiContext.getAdvice();
+            Advice advice = apiContext.getAdvice();
             advice.setStatusCode( -999 );
             advice.putExtra( "isUnexpectedException", true );
 
+            log.debug( "^^^^^^" );
             return fluxOnError ? Flux.empty() : Mono.empty();
         }
-        finally {
-            if( log.isDebugEnabled() ) {
-                log.debug( "END: Lush interception" );
-            }
+    }
+
+    private void errorHandler(LushContext apiContext, Throwable throwable ) {
+        throwable.printStackTrace( new StackTraceToLoggerWriter(log) );
+
+        Advice advice = apiContext.getAdvice();
+        if( advice != null ) {
+            log.warn( "advice is null in context - cannot set status codes" );
+            advice.setStatusCode( -999 );
+            advice.putExtra( "isUnexpectedException", true );
         }
     }
 

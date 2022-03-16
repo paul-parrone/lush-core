@@ -10,17 +10,17 @@ import java.util.*;
  * @author Paul Parrone
  */
 @NoArgsConstructor
-public class ResultAdvice {
+public class Advice {
     @Getter @Setter
     private String traceId = "";
     @Getter @Setter
     private int statusCode = 0;
 
-    private List<ResultDetail> resultDetail = new ArrayList<>();
+    private List<Warning> warnings = new ArrayList<>();
 
     private final Map<String,Object> extras = new HashMap<>();
 
-    public ResultAdvice(String traceId, int statusCode) {
+    public Advice(String traceId, int statusCode) {
         this.traceId = traceId;
         this.statusCode = statusCode;
     }
@@ -44,30 +44,30 @@ public class ResultAdvice {
     }
 
     /**
-     * Get any detail that was added to the advice from the controller.
+     * Get any warnings contained in this advice.
      *
      * @return The detail of the result.
      */
-    public Collection<ResultDetail> getResultDetail() {
-        return Collections.unmodifiableList(resultDetail);
+    public Collection<Warning> getWarnings() {
+        return Collections.unmodifiableList(warnings);
     }
 
     /**
-     * Add a ResultDetail instance to this advice.  This will be carried back to the caller.
+     * Add a warning to this advice.  This will be carried back to the caller.
      *
-     * @param resultDetail A ResultDetail instance to add to this advice.
+     * @param warning A ResultDetail instance to add to this advice.
      */
-    public void addResultDetail(ResultDetail resultDetail) {
-        this.resultDetail.add(resultDetail);
+    public void addWarning(Warning warning) {
+        this.warnings.add(warning);
     }
 
     @Data
     @AllArgsConstructor
-    public static class ResultDetail {
+    public static class Warning {
         private final int code;
         private final Map<String,Object> detail;
 
-        public ResultDetail(int code) {
+        public Warning(int code) {
             this.code = code;
             detail = new HashMap<>();
         }

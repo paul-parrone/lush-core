@@ -1,8 +1,119 @@
-####Thoughts?
-* Passport service?
-* Apache Apisix?
-* JWT/Basic -> Gateway -> Passport -> Microservice
+###Introduction
+In this day and age of libraries and frameworks stacked on top of libraries and frameworks, it can be somewhat daunting to narrow down and pick the optimzl set of components to design and build an application architecture.
+
+Frameworks such as Spring are designed to solve a very broad range of issues - all of these things are above what one would need to build an application.  The design of Spring reflects this, choose what you need for your particular application and the framework will make using those components as easy to use as possible.
+
+So, how does one go from the seemingly endless functionality of Spring to an application architecture that can support whatever it is we are building?  This is where the ideas behind Lush come from.
+
+
+
+
+
+
+
+
+
+I think it helps to think of Lush as being what comes out if we were to put the entire Spring Framework through an **application architecture funnel**.
+
+TODO: PUT A FUNNEL IMAGE HERE :)
+
+The end result being an application architecture that works for our application while avoiding some complexities of things we may not need or want.  It's also critical that our application architecture is not so opinionated that it doesn't allow for the   breadth of Spring if/when we need it.  
+
+Before we continue, let me give you some thoughts on what I believe an application architecutre really is.  Over the years, I've been fortunate to build quite a few systems from the ground up.  I have always found that there is a bare minimum application architecture necessary to get started and produce the system in a consistent/reliable manner.
+
+To me, an application architecture provides simple, understandable patterns and/or implementations.  It tries to take higher level decisions out of the developers hands which in turns enables them to focus on building the application.  A good application architecutre will do these things and seamlessly ensure things such as:
+
+* Log tracing
+* Exception handling
+* Exception propagation
+* Security
+
+###???
+Given this, below are the high level goals of Lush:
+
+* Provide value without getting in the way
+* Define patterns for common application interactions.
+* Provide integrated architecture code for front/back end.
+
+Lush strives to have a very small learning curve by building on the same patterns that Spring already provides.  As you'll see in the examples below, Lush specific behavior is completely optional and provided via simple parameter injection and/or AOP.
+
+By providing a small but powerful set of core classes and defining a set of simple protocols Lush helps create an application that is production ready and consistent.  All achieved without developers being burdened with the details on how to make these things happen,  As a matter of fact, we like to think that Lush can take many of the mundane decisions out of developers hands.
+
+
+
+
+
+
+
+
+
+####Spring Integrations
+* Spring Sleuth and Zipkin for log tracing.
+  * acting user name automatically added to MDC
+  * acting user name automatically propagated to Zipkin
+* Spring Security for endpoints.
+* Spring WebFlux
+
+
+
+
+###TODO: Things to explain
+* Passport
+* Security
+* Advice/Warnings
+* LushContext
 * 
+
+
+Lush tries to break things down into three types of endpoint requests:
+
+1. Just give me some list of data.
+2. Submit some data (probably from a form) and update some persistent store.
+3. Submit some data, validate it, let me know if the data is accepted or not.
+
+On the surface, this is simple and in the happy path it is.  One can use the normal Spring abstractions to create a Controller, Service and Dao and all is well.  But, if we are thinking of making sure this is production ready, a bunch of other ugly questions rear their heads:
+
+1. What if an exception occurs?
+2. What if I'm validating the input and the changes can't be made?
+3. If something does go wrong, how will we troubleshoot it?
+
+Now, we can leave the answers to these questions up to each individual developer but that is guaranteed to result in very inconsistent results.  This is the space that Lush tries to fill in.
+
+How does Lush do this?  Via the below:
+
+* Enhanced controller implementation patterns - Spring with extras.
+* A simple and well-defined conversation protocol.
+* *Invisible* exception handling - through the power of AOP.
+* Integrated front-end libraries - automatically carry Lush patterns to the front-end.
+* Automatic injection of LushContext and/or Passport if needed.
+
+
+
+
+###Requests
+The three types of requests:
+
+* Just give me some data
+* Submit some data (aka: form)
+* Conversational - submit some data, may result is acceptance or denial based on some validation
+
+
+**Just give me some data**
+**Submit some data**
+Lush stays out of the way, you can build your controller exactly as you would in Spring.  No extra work is *necessary* but Lush is still there to handle any unexpected conditions in the Lush way.
+
+TODO: Example
+
+
+
+**Conversational**
+Again, Lush stays out of the way, but through the Lush context, the server side code can send result details back to the caller.  In this manner, Lush allows for data to be sent back as well as 'advice' as to why or why not the operation was allowed to happen.
+
+TODO: Example
+
+
+
+
 
 ####Roadmap
 1. Scope Lush (at least what want to show)
@@ -54,18 +165,7 @@ docker run -d --name elasticsearch --net lush-dev -p 9200:9200 -p 9300:9300 -e "
 * Runnable tests (simple)
 * 
 
- 
-####Goals
-* Provide value without getting in the way
-* Provide patterns for common application interactions
-* Provide integrated architecture code for front/back end.
 
-
-* Automatic log tracking.
-* Controller implementation patterns.
-* Exception handling patterns.
-* Integrated front-end portion - carries patterns to UI.
-* Simple well-defined conversation protocol.
 
 
 
@@ -175,3 +275,9 @@ Unexpected exception
 
 
 
+
+While this iteration focuses on Java/Spring, I think the concepts can be carried to any language/framework.
+
+
+Lush Image:
+http://cliparts.co/clipart/2398680

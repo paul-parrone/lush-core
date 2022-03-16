@@ -1,7 +1,7 @@
 package com.px3j.lush.service.endpoint.http.reactive;
 
 import com.google.gson.Gson;
-import com.px3j.lush.core.ResultAdvice;
+import com.px3j.lush.core.Advice;
 import com.px3j.lush.service.endpoint.http.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 
 
 /**
- * Filter that will set up each request for consumption down the line.
+ * A filter that will apply Lush principals to a request/response.
  *
  * @author Paul Parrone
  */
@@ -32,7 +32,7 @@ public class EndpointFilter implements WebFilter {
     @Override
     public Mono<Void> filter(final ServerWebExchange exchange, WebFilterChain webFilterChain) {
         final String requestKey = generateTraceId();
-        final ResultAdvice advice = new ResultAdvice(requestKey, 200);
+        final Advice advice = new Advice(requestKey, 200);
 
         // Set up the thread local ApiContext object - this will be used by the decorator to handle the reqeust
         // and response advice
@@ -41,7 +41,7 @@ public class EndpointFilter implements WebFilter {
         context.setAdvice( advice );
         context.setExchange( exchange );
 
-        // Setup the exchange to add the advice response header once the controller method has returned.
+        // Set up the exchange to add the advice response header once the controller method has returned.
         exchange.getResponse().beforeCommit( () -> {
                     return Mono.deferContextual(Mono::just).doOnNext(ctx -> {
                         HttpHeaders headers = exchange.getResponse().getHeaders();

@@ -11,6 +11,6 @@ import lombok.*;
 @NoArgsConstructor
 @Data
 public class LushContext {
-    private ResultAdvice advice;
+    private Advice advice;
     private String traceId;
 }

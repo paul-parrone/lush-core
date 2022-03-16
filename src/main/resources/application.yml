@@ -3,18 +3,3 @@ logging:
     root: INFO
     com.px3j.lush: DEBUG
 
-
-#spring:
-#  data:
-#    mongodb:
-#      database: lush-db
-#      host: localhost
-#      port: 27017
-#
-#  mongodb:
-#    embedded:
-#      version: 4.4.11
-#
-#lush:
-#  security:
-#    protected-paths: "/cats/**"
