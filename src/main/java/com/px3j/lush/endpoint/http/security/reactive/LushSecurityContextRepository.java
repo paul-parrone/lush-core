@@ -1,10 +1,10 @@
-package com.px3j.lush.service.endpoint.http.security.reactive;
+package com.px3j.lush.endpoint.http.security.reactive;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import com.px3j.lush.core.security.Passport;
-import com.px3j.lush.service.endpoint.http.Constants;
+import com.px3j.lush.core.model.Passport;
+import com.px3j.lush.endpoint.http.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextImpl;
@@ -49,7 +49,7 @@ public class LushSecurityContextRepository implements ServerSecurityContextRepos
             return Mono.just( new SecurityContextImpl(authToken) );
         }
         catch (JsonSyntaxException e) {
-            log.warn( "Invalid JSON in ticket header" );
+            log.warn( "Invalid JSON in who header" );
             return Mono.empty();
         }
     }

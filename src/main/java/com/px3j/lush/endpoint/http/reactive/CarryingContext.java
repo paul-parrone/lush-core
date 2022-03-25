@@ -1,12 +1,12 @@
-package com.px3j.lush.service.endpoint.http.reactive;
+package com.px3j.lush.endpoint.http.reactive;
 
-import com.px3j.lush.core.LushContext;
+import com.px3j.lush.core.model.LushContext;
 import lombok.Getter;
 import org.springframework.web.server.ServerWebExchange;
 
 
 /**
- * Extension of ApiContext that can carry the ServerWebExchange.  Meant to be used only by the framework
+ * Extension of LushContext that can carry the ServerWebExchange.  This class is meant to be used internally by Lush only.
  *
  * @author Paul Parrone
  */

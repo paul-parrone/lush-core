@@ -1,11 +1,11 @@
-package com.px3j.lush.core;
+package com.px3j.lush.core.model;
 
 import lombok.*;
 
 import java.util.*;
 
 /**
- * Contains 'advice' generated from the invocation of an endpoint.
+ * Represents the advice that is generated from the invocation of an endpoint.
  *
  * @author Paul Parrone
  */

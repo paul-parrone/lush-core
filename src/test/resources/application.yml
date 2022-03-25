@@ -22,6 +22,5 @@ logging:
 
 lush:
   security:
-    # NOTE: do not put a space after the comma as Spring does not trim it...
     protected-paths: /lush/app/**
     public-paths: /actuator/**, /health/**

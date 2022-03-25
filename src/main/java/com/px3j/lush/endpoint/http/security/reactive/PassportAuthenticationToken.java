@@ -1,6 +1,6 @@
-package com.px3j.lush.service.endpoint.http.security.reactive;
+package com.px3j.lush.endpoint.http.security.reactive;
 
-import com.px3j.lush.core.security.Passport;
+import com.px3j.lush.core.model.Passport;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 
 import java.util.Map;

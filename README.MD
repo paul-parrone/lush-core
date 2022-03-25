@@ -1,25 +1,17 @@
 ###Introduction
-In this day and age of libraries and frameworks stacked on top of libraries and frameworks, it can be somewhat daunting to narrow down and pick the optimzl set of components to design and build an application architecture.
+In this day and age of libraries and frameworks - stacked on top of libraries and frameworks, it can be somewhat daunting to narrow down and pick the optimal set of components to design and build an application architecture.
 
-Frameworks such as Spring are designed to solve a very broad range of issues - all of these things are above what one would need to build an application.  The design of Spring reflects this, choose what you need for your particular application and the framework will make using those components as easy to use as possible.
+By design, frameworks such as Spring are designed to solve a very broad range of issues - all of these things above what one would need to build an application.  The design of Spring reflects this, choose what you need for your particular application and the framework will integrate these components as easily as possible.
 
-So, how does one go from the seemingly endless functionality of Spring to an application architecture that can support whatever it is we are building?  This is where the ideas behind Lush come from.
+This begs the question - How does one go from the seemingly endless functionality of Spring down to an application architecture that can support whatever it is we are building?  This is where the ideas behind Lush come from.
 
-
-
-
-
-
-
-
-
-I think it helps to think of Lush as being what comes out if we were to put the entire Spring Framework through an **application architecture funnel**.
+When I try to explain Lush with a visual, I say that it helps to think of Lush as being what comes out if we were to put the entire Spring Framework through an **application architecture funnel**.
 
 TODO: PUT A FUNNEL IMAGE HERE :)
 
-The end result being an application architecture that works for our application while avoiding some complexities of things we may not need or want.  It's also critical that our application architecture is not so opinionated that it doesn't allow for the   breadth of Spring if/when we need it.  
+The end result being an application architecture that works for our application while avoiding complexities we may not need.  It's also critical that our application architecture is not so opinionated that it does not allow for the breadth of Spring if/when we need it.  
 
-Before we continue, let me give you some thoughts on what I believe an application architecutre really is.  Over the years, I've been fortunate to build quite a few systems from the ground up.  I have always found that there is a bare minimum application architecture necessary to get started and produce the system in a consistent/reliable manner.
+Before we continue, let me give you some thoughts on what I believe an application architecture is.  Over the years, I've been fortunate to build quite a few systems from the ground up.  I have always found that there is a bare minimum amount of infrastructure code that is necessary to both get started and build the system in a consistent and reliable manner.
 
 To me, an application architecture provides simple, understandable patterns and/or implementations.  It tries to take higher level decisions out of the developers hands which in turns enables them to focus on building the application.  A good application architecutre will do these things and seamlessly ensure things such as:
 
@@ -281,3 +273,5 @@ While this iteration focuses on Java/Spring, I think the concepts can be carried
 
 Lush Image:
 http://cliparts.co/clipart/2398680
+
+

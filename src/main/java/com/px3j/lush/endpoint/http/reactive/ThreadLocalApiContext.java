@@ -1,6 +1,6 @@
-package com.px3j.lush.service.endpoint.http.reactive;
+package com.px3j.lush.endpoint.http.reactive;
 
-import com.px3j.lush.core.LushContext;
+import com.px3j.lush.core.model.LushContext;
 
 /**
  * ThreadLocal to contain ApiContext - allows passing from the WebFlux layer into our Aspects

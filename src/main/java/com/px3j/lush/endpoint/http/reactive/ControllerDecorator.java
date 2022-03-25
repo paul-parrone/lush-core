@@ -1,17 +1,16 @@
-package com.px3j.lush.service.endpoint.http.reactive;
+package com.px3j.lush.endpoint.http.reactive;
 
 import brave.baggage.BaggageField;
-import com.px3j.lush.core.Advice;
+import com.px3j.lush.core.model.Advice;
 import com.px3j.lush.core.exception.StackTraceToLoggerWriter;
-import com.px3j.lush.core.LushContext;
-import com.px3j.lush.core.security.Passport;
+import com.px3j.lush.core.model.LushContext;
+import com.px3j.lush.core.model.Passport;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.reactivestreams.Publisher;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.sleuth.Tracer;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
@@ -23,7 +22,8 @@ import java.lang.reflect.Method;
 import java.util.Optional;
 
 /**
- * Aspect that will intercept calls to Lush based controllers.
+ * Decorator, applied via AOP, that intercepts calls to any Lush based controllers.  It silently intercepts and provides
+ * the Lush functionality.
  *
  * @author Paul Parrone
  */
@@ -31,12 +31,10 @@ import java.util.Optional;
 @Aspect
 @Component()
 public class ControllerDecorator {
-    private final Tracer tracer;
     private final BaggageField lushUserNameField;
 
     @Autowired
-    public ControllerDecorator(Tracer tracer, BaggageField lushUserNameField) {
-        this.tracer = tracer;
+    public ControllerDecorator(BaggageField lushUserNameField) {
         this.lushUserNameField = lushUserNameField;
     }
 
@@ -45,7 +43,6 @@ public class ControllerDecorator {
         return ReactiveSecurityContextHolder.getContext()
                 .map( sc -> (Passport) sc.getAuthentication().getPrincipal() )
                 .map(passport -> {
-//                    MDC.put( "username", passport.getUsername() );
                     lushUserNameField.updateValue(passport.getUsername());
                     return passport;
                 })
@@ -57,7 +54,6 @@ public class ControllerDecorator {
         return ReactiveSecurityContextHolder.getContext()
                 .map( sc -> (Passport) sc.getAuthentication().getPrincipal() )
                 .map(passport -> {
-//                    MDC.put( "username", passport.getUsername() );
                     lushUserNameField.updateValue(passport.getUsername());
                     return passport;
                 })
@@ -80,8 +76,7 @@ public class ControllerDecorator {
             // If the method declares an argument of Passport, inject it (we inject it by copying the values)
             injectPassport( method, pjp, passport );
 
-            // Invoke the target method wrapped in a publisher so we can handle exceptions
-            // when necessary...
+            // Invoke the target method wrapped in a publisher - this allows us to handle exceptions in the Lush way
             if( fluxOnError ) {
                 return Flux.from((Publisher<?>) pjp.proceed())
                         .onErrorResume( throwable -> {
@@ -122,10 +117,17 @@ public class ControllerDecorator {
         }
     }
 
-    private void errorHandler(LushContext apiContext, Throwable throwable ) {
+    /**
+     * Helper method to populate the returned Advice properly in the event that an unexpected exception occurs during
+     * this call.
+     *
+     * @param lushContext The context to populate.
+     * @param throwable The exception causing the error.
+     */
+    private void errorHandler(LushContext lushContext, Throwable throwable ) {
         throwable.printStackTrace( new StackTraceToLoggerWriter(log) );
 
-        Advice advice = apiContext.getAdvice();
+        Advice advice = lushContext.getAdvice();
         if( advice != null ) {
             log.warn( "advice is null in context - cannot set status codes" );
             advice.setStatusCode( -999 );
@@ -133,6 +135,13 @@ public class ControllerDecorator {
         }
     }
 
+    /**
+     * Helper method to inject the Passport if the method being called requests it.
+     *
+     * @param method The method being called.
+     * @param pjp The joinpoint.
+     * @param passport The passport instance to inject.
+     */
     private void injectPassport(Method method, ProceedingJoinPoint pjp, Passport passport ) {
         findArgumentIndex( method, Passport.class )
                 .ifPresent( (i) -> {
@@ -155,23 +164,16 @@ public class ControllerDecorator {
                     contextArg.setTraceId( lushContext.getTraceId() );
                     contextArg.setAdvice( lushContext.getAdvice() );
                 });
-
-/*
-        int index = 0;
-
-        for( Parameter p : method.getParameters() ) {
-            if( p.getType() == LushContext.class ) {
-                // Set the values on the context in the args array...
-                LushContext contextArg = (LushContext) pjp.getArgs()[index];
-                contextArg.setTraceId( lushContext.getTraceId() );
-                contextArg.setAdvice( lushContext.getAdvice() );
-            }
-
-            index++;
-        }
-*/
     }
 
+    /**
+     * Find the argument index of the parameter of type clazz (if there is one) and return the index.
+     *
+     * @param method The method object to check.
+     * @param clazz The type of argument to find.
+     *
+     * @return The index if found, or empty.
+     */
     private Optional<Integer> findArgumentIndex(Method method, Class clazz ) {
         Class<?>[] parameterTypes = method.getParameterTypes();
         for( int i=0; i<parameterTypes.length; i++ ) {
@@ -183,6 +185,15 @@ public class ControllerDecorator {
         return Optional.empty();
     }
 
+    /**
+     * Extract a Method object representing the method being called from the joinpoint.
+     *
+     * @param pjp The joinpoint to inspect.
+     * @return A Method instance represent the method being called.
+     *
+     * @throws NoSuchMethodException
+     * @throws SecurityException
+     */
     private Method getMethodBeingCalled(ProceedingJoinPoint pjp ) throws NoSuchMethodException, SecurityException {
         MethodSignature signature = (MethodSignature)pjp.getSignature();
         Method method = signature.getMethod();

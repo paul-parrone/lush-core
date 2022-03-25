@@ -1,8 +1,8 @@
-package com.px3j.lush.service.endpoint.http.reactive;
+package com.px3j.lush.endpoint.http.reactive;
 
 import com.google.gson.Gson;
-import com.px3j.lush.core.Advice;
-import com.px3j.lush.service.endpoint.http.Constants;
+import com.px3j.lush.core.model.Advice;
+import com.px3j.lush.endpoint.http.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.sleuth.Tracer;
@@ -13,9 +13,10 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
 
 /**
- * A filter that will apply Lush principals to a request/response.
+ * WebFilter that applies Lush behaviors to a request/response.
  *
  * @author Paul Parrone
  */
@@ -34,21 +35,18 @@ public class EndpointFilter implements WebFilter {
         final String requestKey = generateTraceId();
         final Advice advice = new Advice(requestKey, 200);
 
-        // Set up the thread local ApiContext object - this will be used by the decorator to handle the reqeust
-        // and response advice
+        // Set up the thread local ApiContext object - this will be used by the decorator to exchange the advice
         CarryingContext context = (CarryingContext) ThreadLocalApiContext.get();
         context.setTraceId( requestKey );
         context.setAdvice( advice );
         context.setExchange( exchange );
 
-        // Set up the exchange to add the advice response header once the controller method has returned.
-        exchange.getResponse().beforeCommit( () -> {
-                    return Mono.deferContextual(Mono::just).doOnNext(ctx -> {
-                        HttpHeaders headers = exchange.getResponse().getHeaders();
-                        headers.add( "Access-Control-Expose-Headers", Constants.ADVICE_HEADER_NAME );
-                        headers.add( Constants.ADVICE_HEADER_NAME, new Gson().toJson(context.getAdvice()));
-                    }).then();
-        });
+        // Set up the exchange to add the Lush advice response header once the controller has done it's work.
+        exchange.getResponse().beforeCommit( () -> Mono.deferContextual(Mono::just).doOnNext(ctx -> {
+            HttpHeaders headers = exchange.getResponse().getHeaders();
+            headers.add(  HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, Constants.ADVICE_HEADER_NAME );
+            headers.add( Constants.ADVICE_HEADER_NAME, new Gson().toJson(context.getAdvice()));
+        }).then());
 
         return webFilterChain.filter(exchange);
     }

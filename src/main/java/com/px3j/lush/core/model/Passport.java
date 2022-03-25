@@ -1,4 +1,4 @@
-package com.px3j.lush.core.security;
+package com.px3j.lush.core.model;
 
 import lombok.Data;
 import org.springframework.beans.BeanUtils;

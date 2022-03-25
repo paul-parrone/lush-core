@@ -1,4 +1,4 @@
-package com.px3j.lush.service.endpoint.http.security.reactive;
+package com.px3j.lush.endpoint.http.security.reactive;
 
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.core.Authentication;

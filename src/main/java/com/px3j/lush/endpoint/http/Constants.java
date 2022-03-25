@@ -1,4 +1,4 @@
-package com.px3j.lush.service.endpoint.http;
+package com.px3j.lush.endpoint.http;
 
 /**
  * Holds constants related to the Lush Framework

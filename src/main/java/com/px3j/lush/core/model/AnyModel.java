@@ -6,10 +6,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Glorified Map with factory method to create from a list of key/value pairs.  Can be used when there is no desire to
- * create a POJO for some data.
+ * A glorified Map with factory method to instantiate from a list of key/value pairs.  This class can be used when there
+ * is no desire to create a POJO for some data.
  *
- * @author paul
+ * @author Paul Parrone
  */
 public class AnyModel extends HashMap<String, Object> {
     public AnyModel(Map<String, Object> m) {
