@@ -1,8 +1,10 @@
 package com.px3j.lush.endpoint.http.security.reactive;
 
-import com.px3j.lush.core.model.Passport;
+import com.px3j.lush.core.passport.Passport;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**

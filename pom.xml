@@ -10,10 +10,10 @@
 
     <properties>
         <java.version>14</java.version>
-        <spring.boot.version>2.6.3</spring.boot.version>
+        <spring.boot.version>2.6.7</spring.boot.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <spring.cloud.version>2021.0.0</spring.cloud.version>
+        <spring.cloud.version>2021.0.2</spring.cloud.version>
     </properties>
 
     <dependencies>
@@ -142,22 +142,4 @@
             <url>https://maven.pkg.github.com/paul-parrone/lush-core</url>
         </repository>
     </distributionManagement>
-
-    <profiles>
-        <profile>
-            <id>lush-core-build</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <dependencies>
-<!--
-                <dependency>
-                    <groupId>de.flapdoodle.embed</groupId>
-                    <artifactId>de.flapdoodle.embed.mongo</artifactId>
-                    <version>3.3.1</version>
-                </dependency>
--->
-            </dependencies>
-        </profile>
-    </profiles>
 </project>

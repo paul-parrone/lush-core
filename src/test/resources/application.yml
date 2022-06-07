@@ -19,6 +19,7 @@ logging:
     root: INFO
 #    org.springframework.web: DEBUG
     com.px3j.lush: DEBUG
+    lush.core.trace: TRACE
 
 lush:
   security:

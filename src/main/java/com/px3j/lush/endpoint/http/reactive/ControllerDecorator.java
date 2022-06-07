@@ -4,15 +4,15 @@ import brave.baggage.BaggageField;
 import com.px3j.lush.core.model.Advice;
 import com.px3j.lush.core.exception.StackTraceToLoggerWriter;
 import com.px3j.lush.core.model.LushContext;
-import com.px3j.lush.core.model.Passport;
+import com.px3j.lush.core.passport.Passport;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.reactivestreams.Publisher;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.sleuth.Tracer;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
@@ -33,16 +33,22 @@ import java.util.Optional;
 public class ControllerDecorator {
     private final BaggageField lushUserNameField;
 
+    private final Logger lushTrace;
+
     @Autowired
-    public ControllerDecorator(BaggageField lushUserNameField) {
+    public ControllerDecorator(BaggageField lushUserNameField, Logger lushTrace) {
         this.lushUserNameField = lushUserNameField;
+        this.lushTrace = lushTrace;
     }
 
     @Around("execution(public reactor.core.publisher.Mono com..lush..controller..*(..))")
     public Mono monoInvocationAdvice(ProceedingJoinPoint pjp) {
+        lushTrace.trace( "ControllerDecorator :: intercepted request - Mono invocation" );
+
         return ReactiveSecurityContextHolder.getContext()
                 .map( sc -> (Passport) sc.getAuthentication().getPrincipal() )
                 .map(passport -> {
+                    lushTrace.trace( "ControllerDecorator :: passport user: " + passport.getUsername() );
                     lushUserNameField.updateValue(passport.getUsername());
                     return passport;
                 })
@@ -51,9 +57,12 @@ public class ControllerDecorator {
 
     @Around("execution(public reactor.core.publisher.Flux com..lush..controller..*(..))")
     public Flux fluxInvocationAdvice(ProceedingJoinPoint pjp) {
+        lushTrace.trace( "ControllerDecorator intercepted request - Flux invocation" );
+
         return ReactiveSecurityContextHolder.getContext()
                 .map( sc -> (Passport) sc.getAuthentication().getPrincipal() )
                 .map(passport -> {
+                    lushTrace.trace( "ControllerDecorator :: passport user: " + passport.getUsername() );
                     lushUserNameField.updateValue(passport.getUsername());
                     return passport;
                 })
