@@ -10,6 +10,7 @@ import java.util.*;
  * @author Paul Parrone
  */
 @NoArgsConstructor
+@ToString
 public class Advice {
     @Getter @Setter
     private String traceId = "";

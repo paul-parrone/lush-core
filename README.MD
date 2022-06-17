@@ -1,4 +1,4 @@
-###Introduction
+### Introduction
 In this day and age of libraries and frameworks - stacked on top of libraries and frameworks, it can be somewhat daunting to narrow down and pick the optimal set of components to design and build an application architecture.
 
 By design, frameworks such as Spring are designed to solve a very broad range of issues - all of these things above what one would need to build an application.  The design of Spring reflects this, choose what you need for your particular application and the framework will integrate these components as easily as possible.
@@ -20,7 +20,7 @@ To me, an application architecture provides simple, understandable patterns and/
 * Exception propagation
 * Security
 
-###???
+### Categorize
 Given this, below are the high level goals of Lush:
 
 * Provide value without getting in the way
@@ -39,7 +39,7 @@ By providing a small but powerful set of core classes and defining a set of simp
 
 
 
-####Spring Integrations
+#### Spring Integrations
 * Spring Sleuth and Zipkin for log tracing.
   * acting user name automatically added to MDC
   * acting user name automatically propagated to Zipkin

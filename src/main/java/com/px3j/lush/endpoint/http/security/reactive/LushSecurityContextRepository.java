@@ -4,7 +4,6 @@ import com.google.gson.JsonSyntaxException;
 import com.px3j.lush.core.passport.Passport;
 import com.px3j.lush.endpoint.http.Constants;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;

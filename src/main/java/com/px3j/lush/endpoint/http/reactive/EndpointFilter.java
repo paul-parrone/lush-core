@@ -5,8 +5,10 @@ import com.px3j.lush.core.model.Advice;
 import com.px3j.lush.endpoint.http.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.sleuth.Span;
 import org.springframework.cloud.sleuth.Tracer;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.NonNullApi;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
@@ -59,8 +61,9 @@ public class EndpointFilter implements WebFilter {
     private String generateTraceId() {
         String contextKey = "?/?";
 
-        if( tracer.currentSpan() != null ) {
-            contextKey = tracer.currentSpan().context().traceId() + "," + tracer.currentSpan().context().spanId();
+        Span currentSpan = tracer.currentSpan();
+        if( currentSpan != null ) {
+            contextKey = currentSpan.context().traceId() + "," + currentSpan.context().spanId();
         }
 
         return contextKey;
