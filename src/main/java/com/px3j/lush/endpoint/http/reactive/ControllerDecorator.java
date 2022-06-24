@@ -5,7 +5,7 @@ import com.px3j.lush.core.model.Advice;
 import com.px3j.lush.core.exception.StackTraceToLoggerWriter;
 import com.px3j.lush.core.model.LushContext;
 import com.px3j.lush.core.passport.Passport;
-import lombok.extern.slf4j.Slf4j;
+import com.px3j.lush.core.util.WithLushDebug;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -27,28 +27,30 @@ import java.util.Optional;
  *
  * @author Paul Parrone
  */
-@Slf4j
 @Aspect
 @Component()
-public class ControllerDecorator {
+public class ControllerDecorator implements WithLushDebug {
     private final BaggageField lushUserNameField;
 
-    private final Logger lushTrace;
+    private final Logger lushDebug;
 
     @Autowired
-    public ControllerDecorator(BaggageField lushUserNameField, Logger lushTrace) {
+    public ControllerDecorator(BaggageField lushUserNameField, Logger lushDebug) {
         this.lushUserNameField = lushUserNameField;
-        this.lushTrace = lushTrace;
+        this.lushDebug = lushDebug;
     }
 
     @Around("execution(public reactor.core.publisher.Mono com..lush..controller..*(..))")
     public Mono monoInvocationAdvice(ProceedingJoinPoint pjp) {
-        lushTrace.trace( "ControllerDecorator :: intercepted request - Mono invocation" );
+        if( isDbg() ) {
+            log( "****" );
+            log( "intercepted request - Mono invocation" );
+        }
 
         return ReactiveSecurityContextHolder.getContext()
                 .map( sc -> (Passport) sc.getAuthentication().getPrincipal() )
                 .map(passport -> {
-                    lushTrace.trace( "ControllerDecorator :: passport user: " + passport.getUsername() );
+                    if( isDbg() ) log( "passport user: " + passport.getUsername() );
                     lushUserNameField.updateValue(passport.getUsername());
                     return passport;
                 })
@@ -57,23 +59,27 @@ public class ControllerDecorator {
 
     @Around("execution(public reactor.core.publisher.Flux com..lush..controller..*(..))")
     public Flux fluxInvocationAdvice(ProceedingJoinPoint pjp) {
-        lushTrace.trace( "ControllerDecorator intercepted request - Flux invocation" );
+        if( isDbg() ) {
+            log("****");
+            log("intercepted request - Flux invocation");
+        }
 
         return ReactiveSecurityContextHolder.getContext()
                 .map( sc -> (Passport) sc.getAuthentication().getPrincipal() )
                 .map(passport -> {
-                    lushTrace.trace( "ControllerDecorator :: passport user: " + passport.getUsername() );
+                    if( isDbg() ) log( "passport user: " + passport.getUsername() );
                     lushUserNameField.updateValue(passport.getUsername());
                     return passport;
                 })
                 .flatMapMany( (passport) -> (Flux)decoratorImpl(pjp, passport,true) );
     }
 
-    private Object decoratorImpl(ProceedingJoinPoint pjp, Passport passport, boolean fluxOnError ) {
-        if( log.isDebugEnabled() ) {
-            log.debug( "vvvvvv" );
-        }
+    @Override
+    public Logger getLushDebug() {
+        return lushDebug;
+    }
 
+    private Object decoratorImpl(ProceedingJoinPoint pjp, Passport passport, boolean fluxOnError ) {
         CarryingContext apiContext = (CarryingContext)ThreadLocalApiContext.get();
 
         try {
@@ -93,9 +99,7 @@ public class ControllerDecorator {
                             return Flux.empty();
                         })
                         .doOnComplete( () -> {
-                            if( log.isDebugEnabled() ) {
-                                log.debug( "^^^^^^" );
-                            }
+                            if( isDbg() ) log( "****" );
                         });
             }
             else {
@@ -105,23 +109,20 @@ public class ControllerDecorator {
                             return Mono.empty();
                         })
                         .doOnSuccess( o -> {
-                            if( log.isDebugEnabled() ) {
-                                log.debug( "^^^^^^" );
-                            }
+                            if( isDbg() ) log( "****" );
                         });
-
             }
         }
 
         // Catch all error handler.  Returns an empty Mono or Flux
         catch (final Throwable throwable) {
-            throwable.printStackTrace( new StackTraceToLoggerWriter(log) );
+            throwable.printStackTrace( new StackTraceToLoggerWriter(lushDebug) );
 
             Advice advice = apiContext.getAdvice();
             advice.setStatusCode( -999 );
-            advice.putExtra( "isUnexpectedException", true );
+            advice.putExtra( "lush.isUnexpectedException", true );
 
-            log.debug( "^^^^^^" );
+            if( isDbg() ) log( "****" );
             return fluxOnError ? Flux.empty() : Mono.empty();
         }
     }
@@ -134,13 +135,13 @@ public class ControllerDecorator {
      * @param throwable The exception causing the error.
      */
     private void errorHandler(LushContext lushContext, Throwable throwable ) {
-        throwable.printStackTrace( new StackTraceToLoggerWriter(log) );
+        throwable.printStackTrace( new StackTraceToLoggerWriter(lushDebug) );
 
         Advice advice = lushContext.getAdvice();
         if( advice != null ) {
-            log.warn( "advice is null in context - cannot set status codes" );
+            warn( "advice is null in context - cannot set status codes" );
             advice.setStatusCode( -999 );
-            advice.putExtra( "isUnexpectedException", true );
+            advice.putExtra( "lush.isUnexpectedException", true );
         }
     }
 
@@ -207,10 +208,14 @@ public class ControllerDecorator {
         MethodSignature signature = (MethodSignature)pjp.getSignature();
         Method method = signature.getMethod();
 
-        if( !method.getDeclaringClass().isInterface() ) {
-            return method;
+        if( method.getDeclaringClass().isInterface() ) {
+            method = pjp.getTarget().getClass().getDeclaredMethod( signature.getName(), method.getParameterTypes() );
         }
 
-        return pjp.getTarget().getClass().getDeclaredMethod( signature.getName(), method.getParameterTypes() );
+        if( isDbg() ) {
+            log( String.format( "invoking: %s::%s", method.getDeclaringClass(), method.getName()));
+        }
+
+        return method;
     }
 }

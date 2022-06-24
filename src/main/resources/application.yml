@@ -1,5 +1,0 @@
-logging:
-  level:
-    root: INFO
-    com.px3j.lush: DEBUG
-

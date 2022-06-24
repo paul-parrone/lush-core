@@ -1,27 +1,13 @@
 spring:
-  application:
-    name: lush-app
-
-  sleuth:
-    baggage:
-      local-fields:
-        - lush-user-name
-      remote-fields:
-        - lush-user-name
-      correlation-enabled: true
-      correlation-fields:
-        - lush-user-name
-      tag-fields:
-        - lush-user-name
+ application:
+   name: lush-app-test
 
 logging:
   level:
     root: INFO
-#    org.springframework.web: DEBUG
     com.px3j.lush: DEBUG
-    lush.core.trace: TRACE
 
 lush:
   security:
     protected-paths: /lush/app/**
-    public-paths: /actuator/**, /health/**
+#    public-paths: /actuator/**, /health/**

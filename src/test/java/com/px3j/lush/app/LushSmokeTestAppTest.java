@@ -13,18 +13,26 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.FluxExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static com.px3j.lush.endpoint.http.Constants.WHO_HEADER_NAME;
 
 @Slf4j
-@SpringBootTest( classes={LushApp.class})
+//@WebFluxTest()
+//@Import(com.px3j.lush.core.LushCoreConfig.class)
+@ActiveProfiles( profiles = {"developer"})
+@SpringBootTest( classes={LushSmokeTestApp.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class LushAppTest {
+public class LushSmokeTestAppTest {
     private WebTestClient webTestClient;
 
     @Autowired
@@ -105,8 +113,25 @@ public class LushAppTest {
     }
 
     @Test
-    public void testWithAdvice() {
-        Passport passport = new Passport("paul", "", List.of(new SimpleGrantedAuthority("user")));
+    public void testWithAdviceThreaded() throws Exception {
+        int numThreads = 15;
+        ExecutorService executor = Executors.newFixedThreadPool( numThreads );
+
+        for( int i=0; i<numThreads; i++ ) {
+            executor.submit( () -> {
+                testWithAdvice(UUID.randomUUID().toString());
+            });
+        }
+
+        executor.shutdown();
+        executor.awaitTermination( 10, TimeUnit.SECONDS );
+    }
+
+//    @Test
+    public void testWithAdvice( String username ) {
+        username = username == null ? "paul" : username;
+
+        Passport passport = new Passport(username, "", List.of(new SimpleGrantedAuthority("user")));
         final String encodedPassport = passport.encode();
 
         FluxExchangeResult<String> resultFlux = webTestClient

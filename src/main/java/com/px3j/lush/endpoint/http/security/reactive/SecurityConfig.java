@@ -1,7 +1,9 @@
 package com.px3j.lush.endpoint.http.security.reactive;
 
 
+import com.px3j.lush.core.util.WithLushDebug;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -14,17 +16,18 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Slf4j
 @Configuration
 @EnableReactiveMethodSecurity
-public class SecurityConfig {
-    private LushAuthenticationManager authenticationManager;
-    private LushSecurityContextRepository contextRepository;
+public class SecurityConfig implements WithLushDebug {
+    private final LushAuthenticationManager authenticationManager;
+    private final LushSecurityContextRepository contextRepository;
+    private final Logger lushDebug;
 
     @Autowired
-    public SecurityConfig(LushAuthenticationManager authenticationManager, LushSecurityContextRepository contextRepository) {
+    public SecurityConfig(LushAuthenticationManager authenticationManager, LushSecurityContextRepository contextRepository, Logger lushDebug) {
         this.authenticationManager = authenticationManager;
         this.contextRepository = contextRepository;
+        this.lushDebug = lushDebug;
     }
 
     @Value("${lush.security.protected-paths}")
@@ -35,13 +38,13 @@ public class SecurityConfig {
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
-        log.debug( String.format("****") );
-        log.debug( String.format("Lush Security Configuration: ") );
-        log.debug( String.format("  - authenticationManager class: %s", authenticationManager.getClass().getName()) );
-        log.debug( String.format("  - contextRepository class: %s", contextRepository.getClass().getName()) );
-        log.debug( String.format("  - protected-paths: %s",protectedPaths.stream().collect(Collectors.joining(","))));
-        log.debug( String.format("  - public-paths: %s",publicPaths.stream().collect(Collectors.joining(","))));
-        log.debug( String.format("****") );
+        log( String.format("****") );
+        log( String.format("Lush Security Configuration: ") );
+        log( String.format("  - authenticationManager class: %s", authenticationManager.getClass().getName()) );
+        log( String.format("  - contextRepository class: %s", contextRepository.getClass().getName()) );
+        log( String.format("  - protected-paths: %s", protectedPaths.stream().collect(Collectors.joining(","))));
+        log( String.format("  - public-paths: %s", publicPaths.stream().collect(Collectors.joining(","))));
+        log( String.format("****") );
 
         return http
                 .formLogin().disable()
@@ -61,17 +64,9 @@ public class SecurityConfig {
                 .build();
     }
 
-/*
-    @Bean
-    public MapReactiveUserDetailsService userDetailsService() {
-        UserDetails user = User
-                .withUsername("user")
-                .password("password")
-//                .password(passwordEncoder().encode("password"))
-                .roles("USER")
-                .build();
-        return new MapReactiveUserDetailsService(user);
+    @Override
+    public Logger getLushDebug() {
+        return lushDebug;
     }
-*/
 }
 

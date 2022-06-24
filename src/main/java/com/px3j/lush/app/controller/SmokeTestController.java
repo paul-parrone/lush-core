@@ -13,19 +13,14 @@ import reactor.core.publisher.Mono;
 import java.util.Map;
 
 /**
- * An example controller that will respond to a 'ping' request.
+ * This is an example controller that shows how you can take advantage of Lush in your applications Controller layer.
  *
  *  @author Paul Parrone
  */
 @Slf4j
 @RestController
 @RequestMapping("/lush/app")
-public class GuidelineController {
-
-    public GuidelineController() {
-        log.debug( "PingController created" );
-    }
-
+public class SmokeTestController {
     /**
      * Example controller method that returns a String (wrapped by a Mono) as we are using Spring WebFlux.
      *
@@ -46,7 +41,7 @@ public class GuidelineController {
 
     /**
      * This method illustrates how to use the passport in a controller method.  Lush will automatically inject it if it
-     * is a parameter to the method.
+     * is a declared parameter to the method.
      *
      * @param passport The passport representing the user triggering this request.
      * @return A Mono wrapping a String that says hi.

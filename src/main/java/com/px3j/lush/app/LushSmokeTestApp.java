@@ -17,8 +17,8 @@ import org.springframework.context.annotation.ComponentScan;
         "com.px3j.lush.endpoint.http",
         "com.px3j.lush.app"
 })
-public class LushApp {
+public class LushSmokeTestApp {
     public static void main(String[] args) {
-        SpringApplication.run(LushApp.class, args);
+        SpringApplication.run(LushSmokeTestApp.class, args);
     }
 }
