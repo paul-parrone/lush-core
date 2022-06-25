@@ -1,7 +1,8 @@
 package com.px3j.lush.core.exception;
 
 /**
- * This is the base class for all exceptions thrown in Lush.
+ * This is the base class for all exceptions thrown in Lush.  Just a simple extension of
+ * RuntimeException.
  *
  * @author Paul Parrone
  */
