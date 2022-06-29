@@ -1,30 +1,30 @@
 package com.px3j.lush.endpoint.http.security.reactive;
 
-import com.px3j.lush.core.passport.Passport;
+import com.px3j.lush.core.ticket.Ticket;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 
 import java.util.Map;
 
 /**
- * Intergrate our Passport with Spring Security
+ * Intergrate our Ticket with Spring Security
  *
  * @author Paul Parrone
  */
 public class PassportAuthenticationToken extends AbstractAuthenticationToken {
-    private final Passport passport;
+    private final Ticket ticket;
 
-    public PassportAuthenticationToken(Passport passport) {
-        super(passport.getAuthorities());
-        this.passport = passport;
+    public PassportAuthenticationToken(Ticket ticket) {
+        super(ticket.getAuthorities());
+        this.ticket = ticket;
     }
 
     @Override
     public Object getCredentials() {
-        return Map.of("username", passport.getUsername(), "password", passport.getPassword() );
+        return Map.of("username", ticket.getUsername(), "password", ticket.getPassword() );
     }
 
     @Override
     public Object getPrincipal() {
-        return passport;
+        return ticket;
     }
 }

@@ -1,9 +1,11 @@
 package com.px3j.lush.endpoint.http.security.reactive;
 
 import com.google.gson.JsonSyntaxException;
-import com.px3j.lush.core.passport.Passport;
+import com.px3j.lush.core.ticket.Ticket;
+import com.px3j.lush.core.ticket.TicketUtil;
 import com.px3j.lush.endpoint.http.Constants;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.web.server.context.ServerSecurityContextRepository;
@@ -16,6 +18,13 @@ import java.util.List;
 @Component
 @Slf4j
 public class LushSecurityContextRepository implements ServerSecurityContextRepository {
+    private final TicketUtil ticketUtil;
+
+    @Autowired
+    public LushSecurityContextRepository(TicketUtil ticketUtil) {
+        this.ticketUtil = ticketUtil;
+    }
+
     @Override
     public Mono<Void> save(ServerWebExchange exchange, SecurityContext context) {
         return Mono.empty();
@@ -34,8 +43,9 @@ public class LushSecurityContextRepository implements ServerSecurityContextRepos
         final String whoAsJson = whoList.get(0);
 
         try {
-            Passport passport = Passport.fromEncodedJson(whoAsJson);
-            PassportAuthenticationToken authToken = new PassportAuthenticationToken(passport);
+            Ticket ticket = ticketUtil.decrypt(whoAsJson);
+
+            PassportAuthenticationToken authToken = new PassportAuthenticationToken(ticket);
             authToken.setAuthenticated(true);
 
             return Mono.just( new SecurityContextImpl(authToken) );

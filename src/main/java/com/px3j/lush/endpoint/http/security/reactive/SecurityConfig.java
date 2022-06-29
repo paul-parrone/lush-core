@@ -1,9 +1,6 @@
 package com.px3j.lush.endpoint.http.security.reactive;
 
-
-import com.px3j.lush.core.util.WithLushDebug;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -18,16 +15,15 @@ import java.util.stream.Collectors;
 
 @Configuration
 @EnableReactiveMethodSecurity
-public class SecurityConfig implements WithLushDebug {
+@Slf4j( topic = "lush.core.debug")
+public class SecurityConfig {
     private final LushAuthenticationManager authenticationManager;
     private final LushSecurityContextRepository contextRepository;
-    private final Logger lushDebug;
 
     @Autowired
-    public SecurityConfig(LushAuthenticationManager authenticationManager, LushSecurityContextRepository contextRepository, Logger lushDebug) {
+    public SecurityConfig(LushAuthenticationManager authenticationManager, LushSecurityContextRepository contextRepository) {
         this.authenticationManager = authenticationManager;
         this.contextRepository = contextRepository;
-        this.lushDebug = lushDebug;
     }
 
     @Value("${lush.security.protected-paths}")
@@ -38,13 +34,13 @@ public class SecurityConfig implements WithLushDebug {
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
-        log( String.format("****") );
-        log( String.format("Lush Security Configuration: ") );
-        log( String.format("  - authenticationManager class: %s", authenticationManager.getClass().getName()) );
-        log( String.format("  - contextRepository class: %s", contextRepository.getClass().getName()) );
-        log( String.format("  - protected-paths: %s", protectedPaths.stream().collect(Collectors.joining(","))));
-        log( String.format("  - public-paths: %s", publicPaths.stream().collect(Collectors.joining(","))));
-        log( String.format("****") );
+        log.info( "****" );
+        log.info("Lush Security Configuration: ");
+        log.info( String.format("  - authenticationManager class: %s", authenticationManager.getClass().getName()) );
+        log.info( String.format("  - contextRepository class: %s", contextRepository.getClass().getName()) );
+        log.info( String.format("  - protected-paths: %s", String.join(",", protectedPaths)));
+        log.info( String.format("  - public-paths: %s", String.join(",", publicPaths)));
+        log.info("****");
 
         return http
                 .formLogin().disable()
@@ -62,11 +58,6 @@ public class SecurityConfig implements WithLushDebug {
                 })
 
                 .build();
-    }
-
-    @Override
-    public Logger getLushDebug() {
-        return lushDebug;
     }
 }
 

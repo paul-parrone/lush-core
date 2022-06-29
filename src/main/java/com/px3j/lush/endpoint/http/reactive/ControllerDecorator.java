@@ -4,14 +4,13 @@ import brave.baggage.BaggageField;
 import com.px3j.lush.core.model.Advice;
 import com.px3j.lush.core.exception.StackTraceToLoggerWriter;
 import com.px3j.lush.core.model.LushContext;
-import com.px3j.lush.core.passport.Passport;
-import com.px3j.lush.core.util.WithLushDebug;
+import com.px3j.lush.core.ticket.Ticket;
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.reactivestreams.Publisher;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -29,28 +28,26 @@ import java.util.Optional;
  */
 @Aspect
 @Component()
-public class ControllerDecorator implements WithLushDebug {
+@Slf4j( topic = "lush.core.debug")
+public class ControllerDecorator {
     private final BaggageField lushUserNameField;
 
-    private final Logger lushDebug;
-
     @Autowired
-    public ControllerDecorator(BaggageField lushUserNameField, Logger lushDebug) {
+    public ControllerDecorator(BaggageField lushUserNameField) {
         this.lushUserNameField = lushUserNameField;
-        this.lushDebug = lushDebug;
     }
 
     @Around("execution(public reactor.core.publisher.Mono com..lush..controller..*(..))")
     public Mono monoInvocationAdvice(ProceedingJoinPoint pjp) {
-        if( isDbg() ) {
-            log( "****" );
-            log( "intercepted request - Mono invocation" );
+        if( log.isDebugEnabled() ) {
+            log.debug( "****" );
+            log.debug( "intercepted request - Mono invocation" );
         }
 
         return ReactiveSecurityContextHolder.getContext()
-                .map( sc -> (Passport) sc.getAuthentication().getPrincipal() )
+                .map( sc -> (Ticket) sc.getAuthentication().getPrincipal() )
                 .map(passport -> {
-                    if( isDbg() ) log( "passport user: " + passport.getUsername() );
+                    if( log.isDebugEnabled() ) log.debug( "ticket user: " + passport.getUsername() );
                     lushUserNameField.updateValue(passport.getUsername());
                     return passport;
                 })
@@ -59,27 +56,22 @@ public class ControllerDecorator implements WithLushDebug {
 
     @Around("execution(public reactor.core.publisher.Flux com..lush..controller..*(..))")
     public Flux fluxInvocationAdvice(ProceedingJoinPoint pjp) {
-        if( isDbg() ) {
-            log("****");
-            log("intercepted request - Flux invocation");
+        if( log.isDebugEnabled() ) {
+            log.debug("****");
+            log.debug("intercepted request - Flux invocation");
         }
 
         return ReactiveSecurityContextHolder.getContext()
-                .map( sc -> (Passport) sc.getAuthentication().getPrincipal() )
+                .map( sc -> (Ticket) sc.getAuthentication().getPrincipal() )
                 .map(passport -> {
-                    if( isDbg() ) log( "passport user: " + passport.getUsername() );
+                    if( log.isDebugEnabled() ) log.debug( "ticket user: " + passport.getUsername() );
                     lushUserNameField.updateValue(passport.getUsername());
                     return passport;
                 })
                 .flatMapMany( (passport) -> (Flux)decoratorImpl(pjp, passport,true) );
     }
 
-    @Override
-    public Logger getLushDebug() {
-        return lushDebug;
-    }
-
-    private Object decoratorImpl(ProceedingJoinPoint pjp, Passport passport, boolean fluxOnError ) {
+    private Object decoratorImpl(ProceedingJoinPoint pjp, Ticket ticket, boolean fluxOnError ) {
         CarryingContext apiContext = (CarryingContext)ThreadLocalApiContext.get();
 
         try {
@@ -88,8 +80,8 @@ public class ControllerDecorator implements WithLushDebug {
 
             // If the method declares an argument of LushContext, inject it (we inject it by copying the values)
             injectLushContext( method, pjp, apiContext );
-            // If the method declares an argument of Passport, inject it (we inject it by copying the values)
-            injectPassport( method, pjp, passport );
+            // If the method declares an argument of Ticket, inject it (we inject it by copying the values)
+            injectPassport( method, pjp, ticket);
 
             // Invoke the target method wrapped in a publisher - this allows us to handle exceptions in the Lush way
             if( fluxOnError ) {
@@ -99,7 +91,7 @@ public class ControllerDecorator implements WithLushDebug {
                             return Flux.empty();
                         })
                         .doOnComplete( () -> {
-                            if( isDbg() ) log( "****" );
+                            if( log.isDebugEnabled() ) log.debug( "****" );
                         });
             }
             else {
@@ -109,20 +101,20 @@ public class ControllerDecorator implements WithLushDebug {
                             return Mono.empty();
                         })
                         .doOnSuccess( o -> {
-                            if( isDbg() ) log( "****" );
+                            if( log.isDebugEnabled() ) log.debug( "****" );
                         });
             }
         }
 
         // Catch all error handler.  Returns an empty Mono or Flux
         catch (final Throwable throwable) {
-            throwable.printStackTrace( new StackTraceToLoggerWriter(lushDebug) );
+            throwable.printStackTrace( new StackTraceToLoggerWriter(log) );
 
             Advice advice = apiContext.getAdvice();
             advice.setStatusCode( -999 );
             advice.putExtra( "lush.isUnexpectedException", true );
 
-            if( isDbg() ) log( "****" );
+            if( log.isDebugEnabled() ) log.debug( "****" );
             return fluxOnError ? Flux.empty() : Mono.empty();
         }
     }
@@ -135,28 +127,28 @@ public class ControllerDecorator implements WithLushDebug {
      * @param throwable The exception causing the error.
      */
     private void errorHandler(LushContext lushContext, Throwable throwable ) {
-        throwable.printStackTrace( new StackTraceToLoggerWriter(lushDebug) );
+        throwable.printStackTrace( new StackTraceToLoggerWriter(log) );
 
         Advice advice = lushContext.getAdvice();
         if( advice != null ) {
-            warn( "advice is null in context - cannot set status codes" );
+            log.warn( "advice is null in context - cannot set status codes" );
             advice.setStatusCode( -999 );
             advice.putExtra( "lush.isUnexpectedException", true );
         }
     }
 
     /**
-     * Helper method to inject the Passport if the method being called requests it.
+     * Helper method to inject the Ticket if the method being called requests it.
      *
      * @param method The method being called.
      * @param pjp The joinpoint.
-     * @param passport The passport instance to inject.
+     * @param ticket The ticket instance to inject.
      */
-    private void injectPassport(Method method, ProceedingJoinPoint pjp, Passport passport ) {
-        findArgumentIndex( method, Passport.class )
+    private void injectPassport(Method method, ProceedingJoinPoint pjp, Ticket ticket) {
+        findArgumentIndex( method, Ticket.class )
                 .ifPresent( (i) -> {
-                    Passport contextArg = (Passport) pjp.getArgs()[i];
-                    contextArg.populateFrom( passport );
+                    Ticket contextArg = (Ticket) pjp.getArgs()[i];
+                    contextArg.populateFrom(ticket);
                 });
     }
 
@@ -201,8 +193,8 @@ public class ControllerDecorator implements WithLushDebug {
      * @param pjp The joinpoint to inspect.
      * @return A Method instance represent the method being called.
      *
-     * @throws NoSuchMethodException
-     * @throws SecurityException
+     * @throws NoSuchMethodException If the method being called cannot be found.
+     * @throws SecurityException If the method cannot be accessed.
      */
     private Method getMethodBeingCalled(ProceedingJoinPoint pjp ) throws NoSuchMethodException, SecurityException {
         MethodSignature signature = (MethodSignature)pjp.getSignature();
@@ -212,8 +204,8 @@ public class ControllerDecorator implements WithLushDebug {
             method = pjp.getTarget().getClass().getDeclaredMethod( signature.getName(), method.getParameterTypes() );
         }
 
-        if( isDbg() ) {
-            log( String.format( "invoking: %s::%s", method.getDeclaringClass(), method.getName()));
+        if( log.isDebugEnabled() ) {
+            log.debug( String.format( "invoking: %s::%s", method.getDeclaringClass(), method.getName()));
         }
 
         return method;

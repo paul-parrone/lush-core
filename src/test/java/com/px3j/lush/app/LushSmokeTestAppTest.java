@@ -2,7 +2,8 @@ package com.px3j.lush.app;
 
 import com.google.gson.Gson;
 import com.px3j.lush.core.model.Advice;
-import com.px3j.lush.core.passport.Passport;
+import com.px3j.lush.core.ticket.Ticket;
+import com.px3j.lush.core.ticket.TicketUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,12 @@ import static com.px3j.lush.endpoint.http.Constants.WHO_HEADER_NAME;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class LushSmokeTestAppTest {
     private WebTestClient webTestClient;
+    private final TicketUtil ticketUtil;
+
+    @Autowired
+    public LushSmokeTestAppTest(TicketUtil ticketUtil) {
+        this.ticketUtil = ticketUtil;
+    }
 
     @Autowired
     public void setUp(ApplicationContext context) {
@@ -47,14 +54,10 @@ public class LushSmokeTestAppTest {
     void contextLoads() {
         // empty test that would fail if our Spring configuration does not load correctly
     }
-
     @Test
     public void testPing() {
-        Passport passport = new Passport("paul", "", List.of(new SimpleGrantedAuthority("user")));
-
-        final String encodedPassport = passport.encode();
-//        String asJson = new Gson().toJson(passport);
-//        final String encodedPassport = new String(Base64.getEncoder().encode( asJson.getBytes(StandardCharsets.UTF_8) ));
+        Ticket ticket = new Ticket("paul", "", List.of(new SimpleGrantedAuthority("user")));
+        final String encodedPassport = ticketUtil.encrypt(ticket);
 
         webTestClient
                 .get()
@@ -71,8 +74,8 @@ public class LushSmokeTestAppTest {
 
     @Test
     public void testSayHi() {
-        Passport passport = new Passport("paul", "", List.of(new SimpleGrantedAuthority("user")));
-        final String encodedPassport = passport.encode();
+        Ticket ticket = new Ticket("paul", "", List.of(new SimpleGrantedAuthority("user")));
+        final String encodedPassport = ticketUtil.encrypt(ticket);
 
         webTestClient
                 .get()
@@ -90,8 +93,8 @@ public class LushSmokeTestAppTest {
 
     @Test
     public void testUnexpectedException() {
-        Passport passport = new Passport("paul", "", List.of(new SimpleGrantedAuthority("user")));
-        final String encodedPassport = passport.encode();
+        Ticket ticket = new Ticket("paul", "", List.of(new SimpleGrantedAuthority("user")));
+        final String encodedPassport = ticketUtil.encrypt(ticket);
 
         FluxExchangeResult<Map> resultFlux = webTestClient
                 .get()
@@ -131,8 +134,8 @@ public class LushSmokeTestAppTest {
     public void testWithAdvice( String username ) {
         username = username == null ? "paul" : username;
 
-        Passport passport = new Passport(username, "", List.of(new SimpleGrantedAuthority("user")));
-        final String encodedPassport = passport.encode();
+        Ticket ticket = new Ticket(username, "", List.of(new SimpleGrantedAuthority("user")));
+        final String encodedPassport = ticketUtil.encrypt(ticket);
 
         FluxExchangeResult<String> resultFlux = webTestClient
                 .get()

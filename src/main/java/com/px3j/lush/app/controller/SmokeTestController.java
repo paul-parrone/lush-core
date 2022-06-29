@@ -3,7 +3,7 @@ package com.px3j.lush.app.controller;
 import com.px3j.lush.core.exception.LushException;
 import com.px3j.lush.core.model.Advice;
 import com.px3j.lush.core.model.LushContext;
-import com.px3j.lush.core.passport.Passport;
+import com.px3j.lush.core.ticket.Ticket;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,8 +26,8 @@ public class SmokeTestController {
      *
      * A few things to note:
      * <ul>
-     *     <li>@PreAuthorize is automatically wired to recognize a Passport as authenticated.</li>
-     *     <li>This controller doesn't use the Passport so it isn't a parameter, see below for how to have passport injected.</li>
+     *     <li>@PreAuthorize is automatically wired to recognize a Ticket as authenticated.</li>
+     *     <li>This controller doesn't use the Ticket so it isn't a parameter, see below for how to have ticket injected.</li>
      * </ul>
      *
      * @return A Mono wrapping a hard-coded String
@@ -40,16 +40,16 @@ public class SmokeTestController {
     }
 
     /**
-     * This method illustrates how to use the passport in a controller method.  Lush will automatically inject it if it
+     * This method illustrates how to use the ticket in a controller method.  Lush will automatically inject it if it
      * is a declared parameter to the method.
      *
-     * @param passport The passport representing the user triggering this request.
+     * @param ticket The ticket representing the user triggering this request.
      * @return A Mono wrapping a String that says hi.
      */
     @RequestMapping("sayHi")
     @PreAuthorize("isAuthenticated()")
-    public Mono<String> sayHi( Passport passport ) {
-        return Mono.just( String.format( "%s says hi!", passport.getUsername()) );
+    public Mono<String> sayHi( Ticket ticket) {
+        return Mono.just( String.format( "%s says hi!", ticket.getUsername()) );
     }
 
     /**
@@ -58,12 +58,12 @@ public class SmokeTestController {
      */
     @RequestMapping("uae")
     @PreAuthorize("isAuthenticated()")
-    public Mono<String> uae( Passport passport ) {
+    public Mono<String> uae( Ticket ticket) {
         if( true ) {
             throw new LushException( "Illustrate Exception Handling" );
         }
 
-        return Mono.just( String.format( "%s says hi!", passport.getUsername()) );
+        return Mono.just( String.format( "%s says hi!", ticket.getUsername()) );
     }
 
     /**
@@ -72,8 +72,29 @@ public class SmokeTestController {
      */
     @RequestMapping("withAdvice")
     @PreAuthorize("isAuthenticated()")
-    public Mono<String> withAdvice( Passport passport, LushContext context ) {
+    public Mono<String> withAdvice(Ticket ticket, LushContext context ) {
         Advice advice = context.getAdvice();
+
+        /* You can set a status code in advice - this is not the same as the HTTP Status Code */
+        advice.setStatusCode( 555 );
+
+        /* You can add extra information to return via Advice */
+        advice.putExtra( "recommendation", "use Lush" );
+
+        /* You can add warnings to advice */
+        advice.addWarning( new Advice.Warning(1, Map.of( "collision", "field1,field2")));
+
+        return Mono.just( "Advice Attached" );
+
+    }
+
+    @RequestMapping("xray")
+    @PreAuthorize("isAuthenticated()")
+    public Mono<String> xray(Ticket ticket, LushContext context ) {
+        Advice advice = context.getAdvice();
+
+        log.info( "Injected ticket: {}", ticket.toString() );
+        log.info( "Injected context: {}", context);
 
         /* You can set a status code in advice - this is not the same as the HTTP Status Code */
         advice.setStatusCode( 555 );
