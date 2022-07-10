@@ -17,11 +17,6 @@ spring:
       tag-fields:
         - lush-user-name
 
-  zipkin:
-    base-url: ${ZIPKIN_BASE_URL:http://zipkin:9411/}
-    sender:
-      type: web
-
 logging:
   level:
     root: INFO
@@ -32,8 +27,8 @@ lush:
   exists: "lush"
   # Here you can specify public and private paths.
   # protected-paths is a comma-separated list of paths that will be protected by the Spring Security
-  # by default, integrated with Lush Passport
+  # by default, integrated with Lush Ticket
   security:
-    protected-paths:
+    protected-paths: /lush/app/*
     public-paths: /actuator/**, /health/**
 

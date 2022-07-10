@@ -1,9 +1,12 @@
-package com.px3j.lush.core;
+package com.px3j.lush.core.config;
 
 import brave.baggage.BaggageField;
 import brave.baggage.CorrelationScopeConfig;
 import brave.context.slf4j.MDCScopeDecorator;
 import brave.propagation.CurrentTraceContext;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.px3j.lush.core.util.YamlPropertySourceFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,5 +39,13 @@ public class LushCoreConfig {
                         .flushOnUpdate()
                         .build())
                 .build();
+    }
+
+    @Bean
+    Gson gson() {
+        return new GsonBuilder()
+                .setPrettyPrinting()
+                .disableHtmlEscaping()
+                .create();
     }
 }

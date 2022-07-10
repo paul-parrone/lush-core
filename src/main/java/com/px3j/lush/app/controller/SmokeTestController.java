@@ -4,6 +4,7 @@ import com.px3j.lush.core.exception.LushException;
 import com.px3j.lush.core.model.Advice;
 import com.px3j.lush.core.model.LushContext;
 import com.px3j.lush.core.ticket.Ticket;
+import com.px3j.lush.endpoint.http.LushControllerMethod;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,6 +33,7 @@ public class SmokeTestController {
      *
      * @return A Mono wrapping a hard-coded String
      */
+    @LushControllerMethod
     @RequestMapping("ping")
     @PreAuthorize("isAuthenticated()")
     public Mono<String> ping() {
@@ -46,6 +48,7 @@ public class SmokeTestController {
      * @param ticket The ticket representing the user triggering this request.
      * @return A Mono wrapping a String that says hi.
      */
+    @LushControllerMethod
     @RequestMapping("sayHi")
     @PreAuthorize("isAuthenticated()")
     public Mono<String> sayHi( Ticket ticket) {
@@ -56,6 +59,7 @@ public class SmokeTestController {
      * This method shows how Lush will intercept an exception and inject its response protocol to signal the error
      * to the caller.
      */
+    @LushControllerMethod
     @RequestMapping("uae")
     @PreAuthorize("isAuthenticated()")
     public Mono<String> uae( Ticket ticket) {
@@ -70,6 +74,7 @@ public class SmokeTestController {
      * This method shows how to use the Lush Advice concept to return meaningful information back to your caller in
      * addition to some data response.
      */
+    @LushControllerMethod
     @RequestMapping("withAdvice")
     @PreAuthorize("isAuthenticated()")
     public Mono<String> withAdvice(Ticket ticket, LushContext context ) {
@@ -88,6 +93,7 @@ public class SmokeTestController {
 
     }
 
+    @LushControllerMethod
     @RequestMapping("xray")
     @PreAuthorize("isAuthenticated()")
     public Mono<String> xray(Ticket ticket, LushContext context ) {

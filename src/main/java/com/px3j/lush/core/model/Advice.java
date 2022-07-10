@@ -26,6 +26,10 @@ public class Advice {
         this.statusCode = statusCode;
     }
 
+    public Advice(String traceId) {
+        this( traceId, 0 );
+    }
+
     /**
      * Get any extras that have been added to this advice.
      * @return Map of extras, could be empty.

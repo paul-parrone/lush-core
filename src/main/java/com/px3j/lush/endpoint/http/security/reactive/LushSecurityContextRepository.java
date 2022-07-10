@@ -45,7 +45,7 @@ public class LushSecurityContextRepository implements ServerSecurityContextRepos
         try {
             Ticket ticket = ticketUtil.decrypt(whoAsJson);
 
-            PassportAuthenticationToken authToken = new PassportAuthenticationToken(ticket);
+            TicketAuthenticationToken authToken = new TicketAuthenticationToken(ticket);
             authToken.setAuthenticated(true);
 
             return Mono.just( new SecurityContextImpl(authToken) );

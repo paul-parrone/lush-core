@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ import java.util.Optional;
  * @author Paul Parrone
  */
 @Aspect
-@Component()
+@Component
 @Slf4j( topic = "lush.core.debug")
 public class ControllerDecorator {
     private final BaggageField lushUserNameField;
@@ -37,7 +38,10 @@ public class ControllerDecorator {
         this.lushUserNameField = lushUserNameField;
     }
 
-    @Around("execution(public reactor.core.publisher.Mono com..lush..controller..*(..))")
+    @Pointcut("@annotation(com.px3j.lush.endpoint.http.LushControllerMethod)")
+    public void lushControllerMethods() {}
+
+    @Around("lushControllerMethods() && execution(public reactor.core.publisher.Mono *..*(..))")
     public Mono monoInvocationAdvice(ProceedingJoinPoint pjp) {
         if( log.isDebugEnabled() ) {
             log.debug( "****" );
@@ -46,15 +50,15 @@ public class ControllerDecorator {
 
         return ReactiveSecurityContextHolder.getContext()
                 .map( sc -> (Ticket) sc.getAuthentication().getPrincipal() )
-                .map(passport -> {
-                    if( log.isDebugEnabled() ) log.debug( "ticket user: " + passport.getUsername() );
-                    lushUserNameField.updateValue(passport.getUsername());
-                    return passport;
+                .map(ticket -> {
+                    if( log.isDebugEnabled() ) log.debug( "ticket user: " + ticket.getUsername() );
+                    lushUserNameField.updateValue(ticket.getUsername());
+                    return ticket;
                 })
-                .flatMap( (passport) -> (Mono)decoratorImpl(pjp, passport,false) );
+                .flatMap( (ticket) -> (Mono)decoratorImpl(pjp, ticket,false) );
     }
 
-    @Around("execution(public reactor.core.publisher.Flux com..lush..controller..*(..))")
+    @Around("lushControllerMethods() && execution(public reactor.core.publisher.Flux *..*(..))")
     public Flux fluxInvocationAdvice(ProceedingJoinPoint pjp) {
         if( log.isDebugEnabled() ) {
             log.debug("****");
@@ -63,12 +67,12 @@ public class ControllerDecorator {
 
         return ReactiveSecurityContextHolder.getContext()
                 .map( sc -> (Ticket) sc.getAuthentication().getPrincipal() )
-                .map(passport -> {
-                    if( log.isDebugEnabled() ) log.debug( "ticket user: " + passport.getUsername() );
-                    lushUserNameField.updateValue(passport.getUsername());
-                    return passport;
+                .map(ticket -> {
+                    if( log.isDebugEnabled() ) log.debug( "ticket user: " + ticket.getUsername() );
+                    lushUserNameField.updateValue(ticket.getUsername());
+                    return ticket;
                 })
-                .flatMapMany( (passport) -> (Flux)decoratorImpl(pjp, passport,true) );
+                .flatMapMany( (ticket) -> (Flux)decoratorImpl(pjp, ticket,true) );
     }
 
     private Object decoratorImpl(ProceedingJoinPoint pjp, Ticket ticket, boolean fluxOnError ) {
@@ -81,7 +85,7 @@ public class ControllerDecorator {
             // If the method declares an argument of LushContext, inject it (we inject it by copying the values)
             injectLushContext( method, pjp, apiContext );
             // If the method declares an argument of Ticket, inject it (we inject it by copying the values)
-            injectPassport( method, pjp, ticket);
+            injectTicket( method, pjp, ticket);
 
             // Invoke the target method wrapped in a publisher - this allows us to handle exceptions in the Lush way
             if( fluxOnError ) {
@@ -144,7 +148,7 @@ public class ControllerDecorator {
      * @param pjp The joinpoint.
      * @param ticket The ticket instance to inject.
      */
-    private void injectPassport(Method method, ProceedingJoinPoint pjp, Ticket ticket) {
+    private void injectTicket(Method method, ProceedingJoinPoint pjp, Ticket ticket) {
         findArgumentIndex( method, Ticket.class )
                 .ifPresent( (i) -> {
                     Ticket contextArg = (Ticket) pjp.getArgs()[i];

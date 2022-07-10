@@ -10,10 +10,10 @@ import java.util.Map;
  *
  * @author Paul Parrone
  */
-public class PassportAuthenticationToken extends AbstractAuthenticationToken {
+public class TicketAuthenticationToken extends AbstractAuthenticationToken {
     private final Ticket ticket;
 
-    public PassportAuthenticationToken(Ticket ticket) {
+    public TicketAuthenticationToken(Ticket ticket) {
         super(ticket.getAuthorities());
         this.ticket = ticket;
     }

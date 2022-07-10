@@ -1,6 +1,7 @@
 package com.px3j.lush.app;
 
 import com.google.gson.Gson;
+import com.px3j.lush.app.inbound.jms.ExampleSender;
 import com.px3j.lush.core.model.Advice;
 import com.px3j.lush.core.ticket.Ticket;
 import com.px3j.lush.core.ticket.TicketUtil;
@@ -10,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.sleuth.Span;
+import org.springframework.cloud.sleuth.Tracer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -29,7 +32,7 @@ import static com.px3j.lush.endpoint.http.Constants.WHO_HEADER_NAME;
 
 @Slf4j
 //@WebFluxTest()
-//@Import(com.px3j.lush.core.LushCoreConfig.class)
+//@Import(com.px3j.lush.core.config.LushCoreConfig.class)
 @ActiveProfiles( profiles = {"developer"})
 @SpringBootTest( classes={LushSmokeTestApp.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -37,9 +40,15 @@ public class LushSmokeTestAppTest {
     private WebTestClient webTestClient;
     private final TicketUtil ticketUtil;
 
+    private final ExampleSender exampleSender;
+
+    private final Tracer tracer;
+
     @Autowired
-    public LushSmokeTestAppTest(TicketUtil ticketUtil) {
+    public LushSmokeTestAppTest(TicketUtil ticketUtil, ExampleSender exampleSender, Tracer tracer) {
         this.ticketUtil = ticketUtil;
+        this.exampleSender = exampleSender;
+        this.tracer = tracer;
     }
 
     @Autowired
@@ -54,10 +63,25 @@ public class LushSmokeTestAppTest {
     void contextLoads() {
         // empty test that would fail if our Spring configuration does not load correctly
     }
+
+    @Test
+    void testJmsSend() {
+        final Span span = tracer.nextSpan();
+        final Ticket ticket = new Ticket("paul", "", List.of(new SimpleGrantedAuthority("user")));
+
+        try(Tracer.SpanInScope spanInScope = tracer.withSpan(span)) {
+            log.info( "About to send a JMS message" );
+            exampleSender.send("jms.message.endpoint", ticket, "first message" );
+            exampleSender.send("jms.message.endpoint", ticket, "second message" );
+        }
+
+    }
+
+
     @Test
     public void testPing() {
         Ticket ticket = new Ticket("paul", "", List.of(new SimpleGrantedAuthority("user")));
-        final String encodedPassport = ticketUtil.encrypt(ticket);
+        final String encodedTicket = ticketUtil.encrypt(ticket);
 
         webTestClient
                 .get()
@@ -65,7 +89,7 @@ public class LushSmokeTestAppTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .headers( httpHeaders -> httpHeaders.put(
                         WHO_HEADER_NAME,
-                        List.of(encodedPassport)
+                        List.of(encodedTicket)
                 ))
                 .exchange()
                 .expectBody(String.class)
@@ -75,7 +99,7 @@ public class LushSmokeTestAppTest {
     @Test
     public void testSayHi() {
         Ticket ticket = new Ticket("paul", "", List.of(new SimpleGrantedAuthority("user")));
-        final String encodedPassport = ticketUtil.encrypt(ticket);
+        final String encodedTicket = ticketUtil.encrypt(ticket);
 
         webTestClient
                 .get()
@@ -83,7 +107,7 @@ public class LushSmokeTestAppTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .headers( httpHeaders -> httpHeaders.put(
                         WHO_HEADER_NAME,
-                        List.of(encodedPassport)
+                        List.of(encodedTicket)
                 ))
                 .exchange()
                 .expectBody(String.class)
@@ -94,7 +118,7 @@ public class LushSmokeTestAppTest {
     @Test
     public void testUnexpectedException() {
         Ticket ticket = new Ticket("paul", "", List.of(new SimpleGrantedAuthority("user")));
-        final String encodedPassport = ticketUtil.encrypt(ticket);
+        final String encodedTicket = ticketUtil.encrypt(ticket);
 
         FluxExchangeResult<Map> resultFlux = webTestClient
                 .get()
@@ -102,7 +126,7 @@ public class LushSmokeTestAppTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .headers(httpHeaders -> httpHeaders.put(
                         WHO_HEADER_NAME,
-                        List.of(encodedPassport)
+                        List.of(encodedTicket)
                 ))
                 .exchange()
                 .returnResult(Map.class);
@@ -113,6 +137,29 @@ public class LushSmokeTestAppTest {
             Advice advice = new Gson().fromJson( adviceHeader.get(0), Advice.class );
             log.info( "Lush Advice: {}", advice.toString() );
         }
+    }
+
+    @Test
+    public void testXray() {
+        String username = "paul";
+
+        Ticket ticket = new Ticket(username, "", List.of(new SimpleGrantedAuthority("user")));
+        final String encodedTicket = ticketUtil.encrypt(ticket);
+
+        FluxExchangeResult<String> resultFlux = webTestClient
+                .get()
+                .uri("/lush/app/xray")
+                .accept(MediaType.APPLICATION_JSON)
+                .headers(httpHeaders -> httpHeaders.put(
+                        WHO_HEADER_NAME,
+                        List.of(encodedTicket)
+                ))
+                .exchange()
+                .returnResult(String.class);
+
+        displayAdvice(resultFlux.getResponseHeaders());
+        resultFlux.getResponseBody()
+                .subscribe( s -> log.info( "Response body is: {}", s ));
     }
 
     @Test
@@ -135,7 +182,7 @@ public class LushSmokeTestAppTest {
         username = username == null ? "paul" : username;
 
         Ticket ticket = new Ticket(username, "", List.of(new SimpleGrantedAuthority("user")));
-        final String encodedPassport = ticketUtil.encrypt(ticket);
+        final String encodedTicket = ticketUtil.encrypt(ticket);
 
         FluxExchangeResult<String> resultFlux = webTestClient
                 .get()
@@ -143,7 +190,7 @@ public class LushSmokeTestAppTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .headers(httpHeaders -> httpHeaders.put(
                         WHO_HEADER_NAME,
-                        List.of(encodedPassport)
+                        List.of(encodedTicket)
                 ))
                 .exchange()
                 .returnResult(String.class);
