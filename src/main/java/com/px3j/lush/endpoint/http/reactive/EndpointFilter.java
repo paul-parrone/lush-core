@@ -1,21 +1,18 @@
 package com.px3j.lush.endpoint.http.reactive;
 
 import com.google.gson.Gson;
-import com.px3j.lush.core.model.Advice;
+import com.px3j.lush.core.model.LushAdvice;
 import com.px3j.lush.endpoint.http.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.sleuth.Span;
 import org.springframework.cloud.sleuth.Tracer;
 import org.springframework.http.HttpHeaders;
-import org.springframework.lang.NonNullApi;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
-
-import java.util.Objects;
 
 /**
  * WebFilter that applies Lush behaviors to a request/response.
@@ -35,7 +32,7 @@ public class EndpointFilter implements WebFilter {
     @Override
     public Mono<Void> filter(final ServerWebExchange exchange, WebFilterChain webFilterChain) {
         final String requestKey = generateTraceId();
-        final Advice advice = new Advice(requestKey, 200);
+        final LushAdvice advice = new LushAdvice(requestKey, 200);
 
         // Set up the thread local ApiContext object - this will be used by the decorator to exchange the advice
         CarryingContext context = (CarryingContext) ThreadLocalApiContext.get();

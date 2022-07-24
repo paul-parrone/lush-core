@@ -1,4 +1,4 @@
-package com.px3j.lush.app;
+package com.px3j.lush.example.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
@@ -27,12 +27,12 @@ import javax.jms.ConnectionFactory;
         "com.px3j.lush.endpoint.http",
         "com.px3j.lush.endpoint.jms",
         "com.px3j.lush.endpoint.websocket",
-        "com.px3j.lush.app"
+        "com.px3j.lush.example"
 })
 @EnableJms
-public class LushSmokeTestApp {
+public class LushExampleServiceApp {
     public static void main(String[] args) {
-        SpringApplication.run(LushSmokeTestApp.class, args);
+        SpringApplication.run(LushExampleServiceApp.class, args);
     }
 
     @Bean

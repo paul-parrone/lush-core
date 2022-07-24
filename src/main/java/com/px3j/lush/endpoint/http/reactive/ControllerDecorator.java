@@ -1,10 +1,10 @@
 package com.px3j.lush.endpoint.http.reactive;
 
 import brave.baggage.BaggageField;
-import com.px3j.lush.core.model.Advice;
+import com.px3j.lush.core.model.LushAdvice;
 import com.px3j.lush.core.exception.StackTraceToLoggerWriter;
 import com.px3j.lush.core.model.LushContext;
-import com.px3j.lush.core.ticket.Ticket;
+import com.px3j.lush.core.ticket.LushTicket;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -49,7 +49,7 @@ public class ControllerDecorator {
         }
 
         return ReactiveSecurityContextHolder.getContext()
-                .map( sc -> (Ticket) sc.getAuthentication().getPrincipal() )
+                .map( sc -> (LushTicket) sc.getAuthentication().getPrincipal() )
                 .map(ticket -> {
                     if( log.isDebugEnabled() ) log.debug( "ticket user: " + ticket.getUsername() );
                     lushUserNameField.updateValue(ticket.getUsername());
@@ -66,7 +66,7 @@ public class ControllerDecorator {
         }
 
         return ReactiveSecurityContextHolder.getContext()
-                .map( sc -> (Ticket) sc.getAuthentication().getPrincipal() )
+                .map( sc -> (LushTicket) sc.getAuthentication().getPrincipal() )
                 .map(ticket -> {
                     if( log.isDebugEnabled() ) log.debug( "ticket user: " + ticket.getUsername() );
                     lushUserNameField.updateValue(ticket.getUsername());
@@ -75,7 +75,7 @@ public class ControllerDecorator {
                 .flatMapMany( (ticket) -> (Flux)decoratorImpl(pjp, ticket,true) );
     }
 
-    private Object decoratorImpl(ProceedingJoinPoint pjp, Ticket ticket, boolean fluxOnError ) {
+    private Object decoratorImpl(ProceedingJoinPoint pjp, LushTicket ticket, boolean fluxOnError ) {
         CarryingContext apiContext = (CarryingContext)ThreadLocalApiContext.get();
 
         try {
@@ -84,7 +84,7 @@ public class ControllerDecorator {
 
             // If the method declares an argument of LushContext, inject it (we inject it by copying the values)
             injectLushContext( method, pjp, apiContext );
-            // If the method declares an argument of Ticket, inject it (we inject it by copying the values)
+            // If the method declares an argument of LushTicket, inject it (we inject it by copying the values)
             injectTicket( method, pjp, ticket);
 
             // Invoke the target method wrapped in a publisher - this allows us to handle exceptions in the Lush way
@@ -114,7 +114,7 @@ public class ControllerDecorator {
         catch (final Throwable throwable) {
             throwable.printStackTrace( new StackTraceToLoggerWriter(log) );
 
-            Advice advice = apiContext.getAdvice();
+            LushAdvice advice = apiContext.getAdvice();
             advice.setStatusCode( -999 );
             advice.putExtra( "lush.isUnexpectedException", true );
 
@@ -124,7 +124,7 @@ public class ControllerDecorator {
     }
 
     /**
-     * Helper method to populate the returned Advice properly in the event that an unexpected exception occurs during
+     * Helper method to populate the returned LushAdvice properly in the event that an unexpected exception occurs during
      * this call.
      *
      * @param lushContext The context to populate.
@@ -133,7 +133,7 @@ public class ControllerDecorator {
     private void errorHandler(LushContext lushContext, Throwable throwable ) {
         throwable.printStackTrace( new StackTraceToLoggerWriter(log) );
 
-        Advice advice = lushContext.getAdvice();
+        LushAdvice advice = lushContext.getAdvice();
         if( advice != null ) {
             log.warn( "advice is null in context - cannot set status codes" );
             advice.setStatusCode( -999 );
@@ -142,16 +142,16 @@ public class ControllerDecorator {
     }
 
     /**
-     * Helper method to inject the Ticket if the method being called requests it.
+     * Helper method to inject the LushTicket if the method being called requests it.
      *
      * @param method The method being called.
      * @param pjp The joinpoint.
      * @param ticket The ticket instance to inject.
      */
-    private void injectTicket(Method method, ProceedingJoinPoint pjp, Ticket ticket) {
-        findArgumentIndex( method, Ticket.class )
+    private void injectTicket(Method method, ProceedingJoinPoint pjp, LushTicket ticket) {
+        findArgumentIndex( method, LushTicket.class )
                 .ifPresent( (i) -> {
-                    Ticket contextArg = (Ticket) pjp.getArgs()[i];
+                    LushTicket contextArg = (LushTicket) pjp.getArgs()[i];
                     contextArg.populateFrom(ticket);
                 });
     }

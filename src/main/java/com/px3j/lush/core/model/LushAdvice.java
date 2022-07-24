@@ -11,22 +11,22 @@ import java.util.*;
  */
 @NoArgsConstructor
 @ToString
-public class Advice {
+public class LushAdvice {
     @Getter @Setter
     private String traceId = "";
     @Getter @Setter
     private int statusCode = 0;
 
-    private List<Warning> warnings = new ArrayList<>();
+    private List<LushWarning> warnings = new ArrayList<>();
 
     private final Map<String,Object> extras = new HashMap<>();
 
-    public Advice(String traceId, int statusCode) {
+    public LushAdvice(String traceId, int statusCode) {
         this.traceId = traceId;
         this.statusCode = statusCode;
     }
 
-    public Advice(String traceId) {
+    public LushAdvice(String traceId) {
         this( traceId, 0 );
     }
 
@@ -53,7 +53,7 @@ public class Advice {
      *
      * @return The detail of the result.
      */
-    public Collection<Warning> getWarnings() {
+    public Collection<LushWarning> getWarnings() {
         return Collections.unmodifiableList(warnings);
     }
 
@@ -62,17 +62,17 @@ public class Advice {
      *
      * @param warning A ResultDetail instance to add to this advice.
      */
-    public void addWarning(Warning warning) {
+    public void addWarning(LushWarning warning) {
         this.warnings.add(warning);
     }
 
     @Data
     @AllArgsConstructor
-    public static class Warning {
+    public static class LushWarning {
         private final int code;
         private final Map<String,Object> detail;
 
-        public Warning(int code) {
+        public LushWarning(int code) {
             this.code = code;
             detail = new HashMap<>();
         }

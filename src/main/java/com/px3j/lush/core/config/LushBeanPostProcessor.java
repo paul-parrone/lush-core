@@ -1,8 +1,8 @@
 package com.px3j.lush.core.config;
 
 import com.google.gson.Gson;
-import com.px3j.lush.core.model.Advice;
-import com.px3j.lush.core.ticket.Ticket;
+import com.px3j.lush.core.model.LushAdvice;
+import com.px3j.lush.core.ticket.LushTicket;
 import com.px3j.lush.core.ticket.TicketUtil;
 import com.px3j.lush.core.util.LushCore;
 import com.px3j.lush.endpoint.jms.LushJmsTemplate;
@@ -92,11 +92,11 @@ class WrappedMessageConverter implements MessageConverter {
     @Override
     public Message toMessage(Object object, Session session) throws JMSException, MessageConversionException {
         Message message;
-        Ticket ticket = null;
+        LushTicket ticket = null;
         String traceId = Objects.requireNonNull(tracer.currentSpan()).context().traceId();
         traceId = traceId == null ? "" : traceId;
 
-        Advice advice = new Advice( traceId );
+        LushAdvice advice = new LushAdvice( traceId );
 
         if( object instanceof LushMessageHolder) {
             LushMessageHolder holder = (LushMessageHolder) object;

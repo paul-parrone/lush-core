@@ -24,13 +24,13 @@ public class TicketUtilImpl implements TicketUtil {
         this.gson = new Gson();
     }
 
-    public String encrypt( Ticket ticket) {
-        String asJson = gson.toJson(ticket, Ticket.class);
+    public String encrypt( LushTicket ticket) {
+        String asJson = gson.toJson(ticket, LushTicket.class);
         return cryptoHelper.encrypt(asJson);
     }
 
-    public Ticket decrypt(final String encryptedJson ) {
+    public LushTicket decrypt(final String encryptedJson ) {
         String decryptedJson = cryptoHelper.decrypt(encryptedJson);
-        return gson.fromJson( decryptedJson, Ticket.class);
+        return gson.fromJson( decryptedJson, LushTicket.class);
     }
 }

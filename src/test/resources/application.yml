@@ -9,5 +9,5 @@ logging:
 
 lush:
   security:
-    protected-paths: /lush/app/**
+    protected-paths: /lush/example/**
 #    public-paths: /actuator/**, /health/**

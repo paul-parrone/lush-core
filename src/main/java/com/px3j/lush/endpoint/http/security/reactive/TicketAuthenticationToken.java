@@ -1,19 +1,19 @@
 package com.px3j.lush.endpoint.http.security.reactive;
 
-import com.px3j.lush.core.ticket.Ticket;
+import com.px3j.lush.core.ticket.LushTicket;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 
 import java.util.Map;
 
 /**
- * Intergrate our Ticket with Spring Security
+ * Intergrate our LushTicket with Spring Security
  *
  * @author Paul Parrone
  */
 public class TicketAuthenticationToken extends AbstractAuthenticationToken {
-    private final Ticket ticket;
+    private final LushTicket ticket;
 
-    public TicketAuthenticationToken(Ticket ticket) {
+    public TicketAuthenticationToken(LushTicket ticket) {
         super(ticket.getAuthorities());
         this.ticket = ticket;
     }

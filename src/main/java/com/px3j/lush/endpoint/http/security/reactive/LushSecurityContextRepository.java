@@ -1,7 +1,7 @@
 package com.px3j.lush.endpoint.http.security.reactive;
 
 import com.google.gson.JsonSyntaxException;
-import com.px3j.lush.core.ticket.Ticket;
+import com.px3j.lush.core.ticket.LushTicket;
 import com.px3j.lush.core.ticket.TicketUtil;
 import com.px3j.lush.endpoint.http.Constants;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +43,7 @@ public class LushSecurityContextRepository implements ServerSecurityContextRepos
         final String whoAsJson = whoList.get(0);
 
         try {
-            Ticket ticket = ticketUtil.decrypt(whoAsJson);
+            LushTicket ticket = ticketUtil.decrypt(whoAsJson);
 
             TicketAuthenticationToken authToken = new TicketAuthenticationToken(ticket);
             authToken.setAuthenticated(true);

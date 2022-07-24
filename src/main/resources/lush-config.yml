@@ -27,8 +27,8 @@ lush:
   exists: "lush"
   # Here you can specify public and private paths.
   # protected-paths is a comma-separated list of paths that will be protected by the Spring Security
-  # by default, integrated with Lush Ticket
+  # by default, integrated with Lush LushTicket
   security:
-    protected-paths: /lush/app/*
+    protected-paths: /lush/example/*
     public-paths: /actuator/**, /health/**
 
