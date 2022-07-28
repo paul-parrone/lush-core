@@ -8,28 +8,25 @@ By design, frameworks such as Spring exist to solve a very broad range of proble
 
 This begs the question - How does one go from the seemingly endless functionality of the Spring Framework down to an architecture that will support our application?  This is where the ideas behind Lush come from.
 
-Lush is born of the multiple iterations of service architecture that I have had the good fortune to build (on top of the vast Spring Framework) over the years.  If you think of it in visual terms, Lush is what comes out if we were to pour the entire Spring Framework through an **service architecture funnel**.
+Lush is born of multiple iterations of service architecture that I have had the good fortune to build (on top of the vast Spring Framework) over the years.  If you think of it in visual terms, Lush is what comes out if we were to pour the entire Spring Framework through a **service architecture funnel**.
 
-TODO: PUT A FUNNEL IMAGE HERE :)
+Lush doesn't try to wrap or hide the Spring Framework at all, it simply provides a pre-assembled set of components that already work together to support a service architecture - a head start if you will.  If Spring is individual blocks, Lush is a set of those blocks partially assembled.
 
-Lush doesn't try to wrap or hide the Spring Framework at all, it simply provides a pre-assembled set of components that already work together to support a service architecture.  If Spring is individual blocks, Lush is a set of those blocks already placed together.
-
-Over the years, I've been fortunate to build quite a few systems from the ground up.  I have repeatedly found that there is a bare minimum amount of infrastructure code that is necessary to get started and build the system in a consistent and reliable manner.  Code that answers the following questions:
+I've been fortunate to build quite a few systems from the ground up.  I have repeatedly found that there is a bare minimum amount of infrastructure code and design patterns necessary to get started and build a consistent and reliable product.  Think of it as infrastructure that answers the following questions (not an all-inclusive list):
 
 * What exception handling guidelines to I enforce and how do I remove the responsibility from developers?
 * How can consistently send data to the front-end?
 * How can I enable a consistent 'conversational protocol' between my services and consumers of them?
-* How should the services be secured?
-* How to consistently propagate user information (identifiers, roles, etc.) into and across
-  services?
+* How should services be secured?
+* How to propagate user information (identifiers, roles, etc.) into and across services?
 * How can I make it as simple as possible for support team to analyze logs when things go wrong?
 
-I believe that a service architecture should provide simple, understandable patterns and/or implementations.  It strives to take common higher-level decisions out of developers hands - amd does so as seamlessly as possible.  Lush tries to do just these things.
+I believe that a service architecture should provide simple, understandable implementations and/or patterns.  It strives to take common higher-level decisions out of developers hands - and does so as seamlessly as possible.  Lush is my attempt to build something that does just these things.
 
 Ok, will all of that said, lets get into some details.
 
 ## Overview
-As stated earlier, think of Lush as a pre-assembled set of building blocks - with that in mind, below are the Spring components already integrated into Lush:
+As stated earlier, think of Lush as a pre-assembled set of building blocks - below are the Spring components already integrated into Lush:
 
 * **Spring Boot**
   * Nothing much to say here just that all Lush services are based on Spring Boot.
@@ -81,25 +78,25 @@ In addition to the preconfigured Spring building blocks, Lush provides a number 
 * JSON formatted logs
 * Spring Boot Actuator included and preconfigured
 
+#### Aids in development
+* Special **developer** profile to provide out-of-box settings when run on developers computer.
+* A **clear-ticket** profile to allow a clear text JSON Lush Ticket to access secured services.
 
----
-
-todo: more detail on developer profile
-
----
-#### Developer Profile
-* Run services on developer machine with simple security
-
-Now that we have all that out of the way, let's introduce a few of the core concepts of Lush.
+Now that we have all that out of the way, let's introduce a few of the core concepts of Lush.  This will help provide some
+understanding of how Lush accomplishes what it does - then we can move on to the Getting Started guide.
 
 ### Lush Concepts
+Lush introduces a few simple concepts that you can add to your existing knowledge of Spring.
+
 * Entry point
 * LushContext
 * LushAdvice
 * LushTicket
 
 #### Entry Point
-Lush defines an Entry Point as the those places where our service functionality is exposed to consumers.  In many cases this is through a REST endpoint (Controller).  Lush also has built in support for exposing service functionality via JMS - with more to come.  Lush will inject much of its magic on requests coming in and responses going out of an Entry Point.
+Lush views an Entry Point as the those places where our service functionality is exposed to consumers.  In many cases this is through a REST endpoint (Controller).  Lush also has built in support for exposing service functionality via JMS - with more to come.  Lush injects much of its magic on inbound/outbound traffic through Entry Points.
+
+I won't go too deep into these concepts here as it will be crystal clear once you create your first service (from the Maven archetype) and view the Getting Started guide.
 
 #### LushContext
 LushContext is a simple object containing an instance of LushAdvice (described below) and a unique trace id for the current request.
@@ -119,9 +116,13 @@ LushAdvice gives you the ability to return more than just data to the consumer o
 | statusCode | The application status code (this is different than the HTTP status code) | This is the overall application defined status code for the request - use to signify application warnings/failures to your callers.                                                                  |
 | warnings   | List of LushWarning objects that can be returned to the caller            | Warnings that the caller should respond to.  Each instance includes a code and some details.  You can use this to send data back to the caller but also signal that there could be potential issues. |
 | extras     | Map of key/value pairs that also can be returned                          | Any other information you want to send back to the caller.                                                                                                                                           |  
+#### Lush Ticket
+LushTicket is how callers gain entry to any Lush based service.  Out of the box, Lush comes with Spring Security preconfigured to allow access only if there is a Lush Ticket contained in the incoming request (for REST endpoints, it is contained in an HTTP header).  
+
+Lush doesn't define how Lush Tickets are created - and it is extensible enough to carry any information your particular use-case requires.  
 
 #### Lush Annotations
-Most of Lush's features can be injected into your code by using the Lush annotations, they are defined below. 
+Last but not least, I wanted to introduce you to Lush Annotations.  Most of Lush's features are injected into your code by using these annotations, they are defined below. 
 
 | Annotation            | Usage                                                                                                 |
 |-----------------------|-------------------------------------------------------------------------------------------------------|
@@ -130,5 +131,19 @@ Most of Lush's features can be injected into your code by using the Lush annotat
 | @LushJmsTemplate      | Use this to tell Lush to inject it's behavior around a JmsTemplate instance                           |
 
 
+#### Developer Mode
+Before concluding, I wanted to touch upon how Lush helps with writing/testing services on development machines.  This as always been a pain point that I've tried to solve - especially when there are multiple services in play.  This is where __developer mode__ comes from.  
+
+As of this writing, Lush provides a few simple techniques that make it easier to work on a service locally.
+
+1. A Maven build profile for local builds that will auto-configure Consul for service discovery.
+2. A Spring profile called __clear-ticket__ which enables developers to satisfy service security by using a clear text JSON formatted Lush Ticket.
+
+
 Hopefully this has given a good overview of what Lush is and how it can help you. Please view the [Getting Started](http://www.lush-arch.tech) guide to get a quick hands on overview of Lush.
 
+---
+
+todo: more detail on developer profile
+
+---
