@@ -14,7 +14,7 @@ import java.security.SecureRandom;
 import java.util.Base64;
 
 @Component
-@Profile("!developer")
+@Profile("!clear-ticket")
 public class CryptoHelper {
     private final String algorithm = "AES/CBC/PKCS5Padding";
     private final CryptoKeys cryptoKeys;
@@ -59,8 +59,7 @@ public class CryptoHelper {
     public static SecretKey generateKey(int n) throws NoSuchAlgorithmException {
         KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
         keyGenerator.init(n);
-        SecretKey key = keyGenerator.generateKey();
-        return key;
+        return keyGenerator.generateKey();
     }
 
     public static IvParameterSpec generateIv() {
@@ -79,12 +78,12 @@ public class CryptoHelper {
 
         System.out.println( "Lush :: Key Generator" );
         System.out.println( "Lush :: Generated keys below" );
-        System.out.println( "");
+        System.out.println();
 
         System.out.println("         lush.crypto.secret-key: " + encodedKey);
         System.out.println("         lush.crypto.access-key: " + encodedIv);
 
-        System.out.println( "");
+        System.out.println();
         System.out.println( "Lush :: be sure to use these keys in any services that use Lush to encrypt/decrypt");
     }
 }
