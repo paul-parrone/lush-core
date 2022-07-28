@@ -16,6 +16,12 @@ public class AnyModel extends HashMap<String, Object> {
         super(m);
     }
 
+    /**
+     * Create a populated instance of AnyModel with the passed in list of key/value pairs
+     *
+     * @param values List of key value pairs - key1, val1, key2, val2, ...
+     * @return A poplated AnyModel instance.
+     */
     public static AnyModel from( Object ...values) {
         Map<String,Object> m = new HashMap<>(values.length/2);
 
