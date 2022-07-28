@@ -1,20 +1,16 @@
-package com.px3j.lush.example;
+package com.px3j.example;
 
 import com.google.gson.Gson;
 import com.px3j.lush.core.model.LushAdvice;
 import com.px3j.lush.core.ticket.LushTicket;
-import com.px3j.lush.example.service.LushExampleServiceApp;
-import com.px3j.lush.example.service.endpoint.jms.ExampleSender;
+import com.px3j.example.service.LushExampleServiceApp;
 import com.px3j.lush.core.ticket.TicketUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.sleuth.Span;
-import org.springframework.cloud.sleuth.Tracer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -34,22 +30,21 @@ import java.util.concurrent.TimeUnit;
 import static com.px3j.lush.endpoint.http.Constants.WHO_HEADER_NAME;
 
 @Slf4j
-@ActiveProfiles( profiles = {"developer"})
+@ActiveProfiles( profiles = {"developer", "clear-ticket"})
 @SpringBootTest( classes={LushExampleServiceApp.class})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class LushExampleServiceTest {
     private WebTestClient webTestClient;
     private final TicketUtil ticketUtil;
 
-    private final ExampleSender exampleSender;
-
-    private final Tracer tracer;
+//    private final ExampleSender exampleSender;
+//    private final Tracer tracer;
 
     @Autowired
-    public LushExampleServiceTest(TicketUtil ticketUtil, ExampleSender exampleSender, Tracer tracer) {
+    public LushExampleServiceTest(TicketUtil ticketUtil/*, ExampleSender exampleSender, Tracer tracer*/) {
         this.ticketUtil = ticketUtil;
-        this.exampleSender = exampleSender;
-        this.tracer = tracer;
+//        this.exampleSender = exampleSender;
+//        this.tracer = tracer;
     }
 
     @Autowired
@@ -128,9 +123,7 @@ public class LushExampleServiceTest {
                 ))
                 .exchange()
                 .expectBodyList(Integer.class)
-                .value( l -> {
-                    l.forEach( i -> log.info( ""+i ) );
-                })
+                .value( l -> l.forEach(i -> log.info( ""+i ) ))
                 .returnResult();
 
         log.info( "END: testFluxOfInts" );
@@ -223,6 +216,8 @@ public class LushExampleServiceTest {
         log.info( "END: testXray" );
     }
 
+    // TODO: JMS support coming soon.
+/*
     @Test
     void testJmsSend() {
         log.info( "START: testJmsSend" );
@@ -238,6 +233,7 @@ public class LushExampleServiceTest {
 
         log.info( "END: testJmsSend" );
     }
+*/
 
     @Test
     public void testWithAdviceThreaded() throws Exception {
@@ -245,9 +241,7 @@ public class LushExampleServiceTest {
         ExecutorService executor = Executors.newFixedThreadPool( numThreads );
 
         for( int i=0; i<numThreads; i++ ) {
-            executor.submit( () -> {
-                testFluxOfIntsWithAdviceImpl(UUID.randomUUID().toString());
-            });
+            executor.submit( () -> testFluxOfIntsWithAdviceImpl(UUID.randomUUID().toString()));
         }
 
         executor.shutdown();

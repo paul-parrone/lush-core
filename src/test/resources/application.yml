@@ -2,12 +2,23 @@ spring:
  application:
    name: lush-app-test
 
+management:
+  #  server:
+  #    port: 7080
+  endpoints:
+    web:
+      exposure:
+        include: "*" #, openapi, swagger-ui
+
 logging:
   level:
     root: INFO
-    com.px3j.lush: DEBUG
+    lush.core.debug: DEBUG
 
 lush:
+  # Here you can specify public and private paths.
+  # protected-paths is a comma-separated list of paths that will be protected by the Spring Security
+  # by default, integrated with Lush LushTicket
   security:
-    protected-paths: /lush/example/**
-#    public-paths: /actuator/**, /health/**
+    protected-paths: /lush/example/*
+    public-paths: /actuator/**, /health/**, /ui/**, /swagger-ui/**, /swagger-resources/**, /v3/api-docs/**, /v3/api-docs.yaml, /swagger-ui.html, /webjars-swagger-ui, /webjars/swagger-ui/index.html, /webjars/**

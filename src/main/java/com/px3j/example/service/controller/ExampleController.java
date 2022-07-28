@@ -1,4 +1,4 @@
-package com.px3j.lush.example.service.controller;
+package com.px3j.example.service.controller;
 
 import com.px3j.lush.core.exception.LushException;
 import com.px3j.lush.core.model.AnyModel;
@@ -28,7 +28,6 @@ import java.util.Map;
 public class ExampleController {
     /**
      * Example controller endpoint that returns a String (wrapped by a Mono) as we are using Spring WebFlux.
-     *
      * A few things to note:
      * <ul>
      *     <li>@PreAuthorize is automatically wired to recognize a LushTicket as authenticated.</li>

@@ -1,6 +1,6 @@
 package com.px3j.lush.endpoint.http;
 
-import com.px3j.lush.example.service.controller.ExampleController;
+import com.px3j.example.service.controller.ExampleController;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
