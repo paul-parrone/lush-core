@@ -22,9 +22,9 @@ I've been fortunate to build quite a few systems from the ground up.  I have rep
 * How to propagate user information (identifiers, roles, etc.) into and across services?
 * How can I make it as simple as possible for support team to analyze logs when things go wrong?
 
-I believe that a service architecture should provide simple, understandable implementations and/or patterns.  It strives to take common higher-level decisions out of developers hands - and does so as seamlessly as possible.  Lush is my attempt to build something that does just these things.
+I believe that a service architecture should provide simple, understandable implementations and/or patterns.  It strives to take common higher-level decisions out of developers hands - and does so as seamlessly as possible.  Lush is my technique to build something that does just these things.
 
-Ok, will all of that said, lets get into some details.
+Ok, with all of that said, lets get into some details.
 
 ## Overview
 As stated earlier, think of Lush as a pre-assembled set of building blocks - below are the Spring components already integrated into Lush:
