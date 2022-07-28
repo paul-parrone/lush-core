@@ -12,11 +12,11 @@ import org.springframework.stereotype.Component;
  * Only active if <b>developer</b> is one of the active Spring profiles.
  */
 @Component
-@Profile("developer")
+@Profile("clear-ticket")
 @Slf4j( topic = "lush.core.debug")
-public class TestTicketUtil implements TicketUtil {
-    public TestTicketUtil() {
-        log.debug( "Using no-op ticket util");
+public class ClearTicketUtil implements TicketUtil {
+    public ClearTicketUtil() {
+        log.debug( "Using ClearTicketUtil");
     }
 
     @Override

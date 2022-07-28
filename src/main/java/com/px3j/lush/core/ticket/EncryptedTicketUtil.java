@@ -12,14 +12,14 @@ import org.springframework.stereotype.Component;
  * @see CryptoHelper
  */
 @Component
-@Profile("!developer")
-public class TicketUtilImpl implements TicketUtil {
+@Profile("!clear-ticket")
+public class EncryptedTicketUtil implements TicketUtil {
     private final CryptoHelper cryptoHelper;
 
     private final Gson gson;
 
     @Autowired
-    public TicketUtilImpl(CryptoHelper cryptoHelper) {
+    public EncryptedTicketUtil(CryptoHelper cryptoHelper) {
         this.cryptoHelper = cryptoHelper;
         this.gson = new Gson();
     }
