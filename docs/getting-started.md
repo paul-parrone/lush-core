@@ -80,20 +80,45 @@ A few things to note:
 2. Line 41 contains the Spring @PreAuthorize annotation - nothing special here except to note that all Lush services have Spring Security pre-configured - you don't have to do anything for this behavior.
 3. The return type is a Mono - Lush is built on Spring WebFlux.
 
-_Swagger_
+_Invoke It_
 
-We'll use Swagger to invoke the endpoint - don't forget to paste in the Lush Ticket before invoking.
+We'll use Swagger to invoke the endpoint.  Expand the **/lush/example/ping** method.  Prior to invoking the endpoint, paste in the sample JSON Lush Ticket from above.
 
 ![img_2.png](img_2.png)
 
-First thing to look at is the response.  It's one JSON object with a message property.  Nothing fancy there.  
+In the image above, first thing to notice is the Response body.  Nothing special there, just a single JSON object with a message property.
 
-Next, let's focus on the _x-lush-advice_ response header.  This response header is automatically injected by Lush.  In this case it's not used for anything but as we dig deeper we will see how it can be used.  One thing to note is that the traceId is a unique id generated for each request and is used in any log statements that are generated as part of processing this request.  
+Next, I want to point out the _x-lush-advice_ response header - you'll see it highlighted in the response headers section.  This is automatically injected by Lush.  While not specifically used in this endpoint, it does show how data and advice can be returned from one endpoint.  
 
-If we look at the service log, we see the following:
+One thing to note is the tradeId property (_3ba214a6f083eec6,3ba214a6f083eec6_ in this case).  The traceId is unique to this request and will be carried by Lush throughout the chain of calls in the backend - even across Lush services.  
+
+View the service log output, you should see something similar to the image below.  Notice that the traceId is visible in each log statement.  Also, the user name is present in all log statements (as shown by the smaller highlight square).
+
 ![img_5.png](img_5.png)
 
-Notice that the traceId value from the Lush Advice header is available on the log statements for this request.  Lush also includes Spring Cloud Sleuth pre-configured.  You'll get the unique traceId on each log line, as well as, the current user (as provided by the Lush Ticket). 
+_Summary_
+
+That completes the dive into a simple Lush HTTP endpoint.  Let's summarize what have we learned.
+
+1. Lush services come with Swagger already integrated and pre-configured to accept a Lush Ticket. 
+
+
+2. Lush services come with Spring Security pre-configured.  Access to services is granted via a Lush Ticket.
+
+
+3. Lush Ticket can be encrypted or clear text.  You can add any extra information to a Lush Ticket that suits your use case.
+
+ 
+4. Lush is based on Spring WebFlux.
+
+
+5. Lush endpoints can return both data and advice.  Lush provides advice to your endpoint method if desired (shown below) and handles sending it back to the caller.
+
+
+6. Lush services come with Spring Cloud Sleuth pre-configured.
+   * All requests are assigned a unique request id.  This request id is returned to the caller, is present in all log statements and is propagated across all Lush service calls.
+   * The Lush Ticket contains the calling username, this is also present in the log statements and propagated across all Lush service calls.
+ 
 
 
 
