@@ -63,31 +63,43 @@ First, a short definition of what Lush considers an entrypoint or endpoint.  Thi
 It'll make more sense as we move along.  For purposes of this document we will focus on HTTP endpoints.
 
 #### The Controller
-First, the simplest case - a simple HTTP endpoint that takes no parameters and returns a String.  If we look at the ExampleController we will find such a method:
+In this section we'll explore an example controller.
 
-##### Test Ping
 
+First, the simplest case - a simple HTTP endpoint that takes no parameters and returns an AnyModel.  If we look at the ExampleController we will find such a method:
+
+##### The ping() endpoint
+This is one of the simplest cases.  This endpoint takes no parameters and returns an instance of __AnyModel__.  Since Lush expects returned data to be in JSON format, we can return instances of AnyModel if there is no need for a proper Java class to represent the returned data.
+
+_The Code_
+![img_4.png](img_4.png)
+
+A few things to note about the code:
+1. On line 39 you'll find the @LushControllerMethod annotation - this tells Lush to inject it's magic around this endpoint.
+2. Line 41 contains the Spring @PreAuthorize annotation - nothing special here except to note that all Lush services have Spring Security pre-configured - you don't have to do anything for this behavior.
+3. The return type is a Mono - Lush is built on Spring WebFlux.
+
+_Swagger_
+
+We'll use Swagger to invoke the endpoint - don't forget to paste in the Lush Ticket before invoking.
 
 ![img_2.png](img_2.png)
 
+First thing to look at is the response.  It's one JSON object with a message property.  Nothing fancy there.  
 
-The Code
-![img_4.png](img_4.png)
+Next, let's focus on the _x-lush-advice_ response header.  This response header is automatically injected by Lush.  In this case it's not used for anything but as we dig deeper we will see how it can be used.  One thing to note is that the traceId is a unique id generated for each request and is used in any log statements that are generated as part of processing this request.  
 
+If we look at the service log, we see the following:
+![img_5.png](img_5.png)
 
-
-Below is  the output
-```text
-2022-07-21 12:57:58.467  INFO [lush-app-test,,] 5588 --- [           main] [core] c.p.lush.example.LushExampleServiceTest  : START: testPing
-2022-07-21 12:57:58.471  INFO [lush-app-test,11240e415483ed5b,11240e415483ed5b] 5588 --- [     parallel-6] [paul] c.p.l.e.s.controller.ExampleController   : ping() has been called
-2022-07-21 12:57:58.477  INFO [lush-app-test,,] 5588 --- [           main] [core] c.p.lush.example.LushExampleServiceTest  : Ping results: Powered By Lush
-2022-07-21 12:57:58.477  INFO [lush-app-test,,] 5588 --- [           main] [core] c.p.lush.example.LushExampleServiceTest  : END: testPing
-```
+Notice that the traceId value from the Lush Advice header is available on the log statements for this request.  Lush also includes Spring Cloud Sleuth pre-configured.  You'll get the unique traceId on each log line, as well as, the current user (as provided by the Lush Ticket). 
 
 
 
 
-##### Test FluxOfInts
+
+
+##### The fluxOfCats() endpoint
 ```java
     /**
      * This endpoint illustrates how you can use a Flux to return a collection of data back to the caller.
