@@ -140,4 +140,4 @@ As of this writing, Lush provides a few simple techniques that make it easier to
 1. A Maven build profile for local builds that will auto-configure Consul for service discovery.
 2. A Spring profile called __clear-ticket__ which enables developers to satisfy service security by using a clear text JSON formatted Lush Ticket.
 
-Hopefully this has given a good overview of what Lush is and how it can help you. Please view the [Getting Started](http://www.github.com/paul-parrone/lush-core/blob/master/getting-started.md) guide to get a quick hands on overview of Lush.
+Hopefully this has given a good overview of what Lush is and how it can help you. Please view the [Getting Started](http://www.github.com/paul-parrone/lush-core/blob/master/docs/getting-started.md) guide to get a quick hands on overview of Lush.
