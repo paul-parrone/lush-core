@@ -75,8 +75,8 @@ _The Code_
 
 ![img_4.png](img_4.png)
 
-A few things to note about the code:
-1. On line 39 you'll find the @LushControllerMethod annotation - this tells Lush to inject it's magic around this endpoint.
+A few things to note:
+1. On line 39 you'll find the **@LushControllerMethod** annotation - this tells Lush to inject it's magic around this endpoint.
 2. Line 41 contains the Spring @PreAuthorize annotation - nothing special here except to note that all Lush services have Spring Security pre-configured - you don't have to do anything for this behavior.
 3. The return type is a Mono - Lush is built on Spring WebFlux.
 
