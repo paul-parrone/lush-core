@@ -97,7 +97,7 @@ Notice that the traceId value from the Lush Advice header is available on the lo
 
 
 
-
+## The rest is still WIP :)
 
 ##### The fluxOfCats() endpoint
 ```java
