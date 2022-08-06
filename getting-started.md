@@ -4,33 +4,76 @@
 This getting started guide will take you through the steps required to create a service based on Lush.  Once we create a service based on the Lush archetype, we will investigate each Lush concept and you can make use of it in your applicaiton.
 
 ### Create Your First Service
-This section will show you how to use the Maven archetype to create your first Lush service.  We will assume a command line in this document, but feel free to use your favorite IDE if you are so inclined.
+This section will show you how to use the Lush Maven archetype to create your first Lush service.  We will assume a command line in this document, but feel free to use your favorite IDE if you'd like.
 
 #### Generate from the Lush Service Archetype
 ```shell
 echo Create a Lush service using Maven archetype
-mvn archetype:generate -DarchetypeGroupId=com.px3j -DarchetypeArtifactId=lush-service -DarchetypeVersion=2022.7.0 -DgroupId=com.poc -DartifactId=my-lush-service
-mvn ..
+mvn archetype:generate -DarchetypeGroupId=com.px3j -DarchetypeArtifactId=lush-service -DarchetypeVersion=2022.7.0-SNAPSHOT -DgroupId=com.poc -DartifactId=my-lush-service
+
+```
+If all goes well, you should see a new service created below your current working directory, cd into that directory and run the maven command below to build the service.  In the commands below, you may need to change **my-lush-service** to your service name, depending on what you chose when creating the service.
+
+#### Build the service
+```shell
+cd my-lush-service
+mvn -Pdeveloper clean package
+```
+Note that we are using the developer maven profile as we are running it on our local machine.  More on that in the README.  If all goes well, your service will be built and the test cases will be run.  You'll see a bunch of output from the test cases, you can ignore that for now.
+
+Next up, let's run the service.  The maven command above will have built a 'fat jar' that contains all required dependencies.  Execute the java command below in your terminal (change the jar name if necessary). 
+
+#### Run the service
+
+```shell
+java -Dspring.profiles.active=clear-ticket -jar target/my-lush-service-1.0-SNAPSHOT.jar
 ```
 
-If all goes well, you should see a new service created, built and test case output.  I'm sure the output looks quite messy, but in the next sections we will dissect it and at the same time introduce the core concepts of Lush.
+---
 
-### Let's Dissect
-First a short definition of what Lush considers an entrypoint or endpoint.  This is the point in the service that is exposed to consumers.  The reason this is important is that this is where Lush does much of its magic.  It'll make more sense as we move along.  For purposes of this document we will focus on HTTP endpoints.
+**Note:** we are activating the clear-ticket Spring profile so that the Lush Ticket can be supplied to the service 
+in plain text.
+
+---
+
+Now that the service is running, your terminal screen should look something like this:
+
+![img_1.png](img_1.png)
+
+
+### Let's Explore
+As we have discussed, one of the benefits of using Lush is that you have a head-start on creating production ready services.  Swagger is already integrated and ready to be used, so for this section, we will explore using the Swagger UI.
+
+Fire up your favorite browser and navigate to the: [http://localhost:9010/swagger-ui.html](http://localhost:9010/swagger-ui.html)
+
+#### We need a Lush Ticket
+Before we can actually invoke any of the services endpoints, we need to make sure we have a ticket (Swagger is pre-configured to allow you to enter a clear text Lush Ticket).  And wouldn't you know we happen to have one below:
+
+```json
+{"username":"lush","password":"","authorities":[{"role":"user"},{"role":"tester"},{"role":"admin"}],"extras":{}}
+```
+
+This is another gain of using Lush - Spring Security is pre-configured and already enabled in any Lush service.
+
+For development you can use an unencrypted Lush Ticket in JSON format.  Elsewhere in the Lush documentation is an explanation of how you can setup your Lush service to require an encrypted Lush Ticket.  But for now we will continue with the clear text version.
+
+#### What's an endpoint?
+First, a short definition of what Lush considers an entrypoint or endpoint.  This is the point in any Lush service that is exposed to consumers.  The reason this is important is that this is where Lush injects much of its magic.  
+
+It'll make more sense as we move along.  For purposes of this document we will focus on HTTP endpoints.
 
 #### The Controller
 First, the simplest case - a simple HTTP endpoint that takes no parameters and returns a String.  If we look at the ExampleController we will find such a method:
 
 ##### Test Ping
-```java
-    @LushControllerMethod
-    @RequestMapping("ping")
-    @PreAuthorize("isAuthenticated()")
-    public Mono<String> ping() {
-        log.info( "ping() has been called" );
-        return Mono.just( "Powered By Lush" );
-    }
-```
+
+
+![img_2.png](img_2.png)
+
+
+The Code
+![img_4.png](img_4.png)
+
 
 
 Below is  the output
