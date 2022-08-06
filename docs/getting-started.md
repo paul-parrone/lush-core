@@ -72,6 +72,7 @@ First, the simplest case - a simple HTTP endpoint that takes no parameters and r
 This is one of the simplest cases.  This endpoint takes no parameters and returns an instance of __AnyModel__.  Since Lush expects returned data to be in JSON format, we can return instances of AnyModel if there is no need for a proper Java class to represent the returned data.
 
 _The Code_
+
 ![img_4.png](img_4.png)
 
 A few things to note about the code:
