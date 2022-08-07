@@ -115,7 +115,7 @@ public class ControllerDecorator {
             throwable.printStackTrace( new StackTraceToLoggerWriter(log) );
 
             LushAdvice advice = apiContext.getAdvice();
-            advice.setStatusCode( -999 );
+            advice.setStatusCode( -99 );
             advice.putExtra( "lush.isUnexpectedException", true );
 
             if( log.isDebugEnabled() ) log.debug( "****" );
@@ -136,7 +136,7 @@ public class ControllerDecorator {
         LushAdvice advice = lushContext.getAdvice();
         if( advice != null ) {
             log.warn( "advice is null in context - cannot set status codes" );
-            advice.setStatusCode( -999 );
+            advice.setStatusCode( -99 );
             advice.putExtra( "lush.isUnexpectedException", true );
         }
     }
