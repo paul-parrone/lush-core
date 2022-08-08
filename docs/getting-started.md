@@ -77,8 +77,15 @@ _The Code_
 
 A few things to note:
 1. On line 39 you'll find the **@LushControllerMethod** annotation - this tells Lush to inject it's magic around this endpoint.
+
+
 2. Line 41 contains the Spring @PreAuthorize annotation - nothing special here except to note that all Lush services have Spring Security pre-configured - you don't have to do anything for this behavior.
+
+
 3. The return type is a Mono - Lush is built on Spring WebFlux.
+
+
+4. This is a basic Spring contoller endpoint method, we've only added the Lush annotation.
 
 _Invoke It_
 
@@ -86,11 +93,11 @@ We'll use Swagger to invoke the endpoint.  Expand the **/lush/example/ping** met
 
 ![img_2.png](img_2.png)
 
-In the image above, first thing to notice is the Response body.  Nothing special there, just a single JSON object with a message property.
+In the image above, let's first glance at the Response body.  Nothing special there, just a single JSON object with a message property.
 
 Next, I want to point out the _x-lush-advice_ response header - you'll see it highlighted in the response headers section.  This is automatically injected by Lush.  While not specifically used in this endpoint, it does show how data and advice can be returned from one endpoint.  
 
-One thing to note is the tradeId property (_3ba214a6f083eec6,3ba214a6f083eec6_ in this case).  The traceId is unique to this request and will be carried by Lush throughout the chain of calls in the backend - even across Lush services.  
+One thing to note is the traceId property (_3ba214a6f083eec6,3ba214a6f083eec6_ in this case).  The traceId is unique to this request and will be carried by Lush throughout the chain of calls in the backend - even across Lush services.  
 
 View the service log output, you should see something similar to the image below.  Notice that the traceId is visible in each log statement.  Also, the user name is present in all log statements (as shown by the smaller highlight square).
 
@@ -119,6 +126,33 @@ That completes the dive into a simple Lush HTTP endpoint.  Let's summarize what 
    * All requests are assigned a unique request id.  This request id is returned to the caller, is present in all log statements and is propagated across all Lush service calls.
    * The Lush Ticket contains the calling username, this is also present in the log statements and propagated across all Lush service calls.
  
+#### The fluxOfCatsWithAdvice endpoint
+This endpoint illustrates how you can use the LushAdvice mechanism to return other information (besides data) to the caller.   
+
+_The Code_
+
+![img.png](img.png)
+
+A few things to note
+1. On line 93 we are declaring both a LushTicket instance and a LushContext instance.  All you have to do is declare them as parameters and lush will inject them for you.
+2. The @Parameter is there to tell Swagger to ignore these parameters.
+
+On line 97, we access the LushAdvice instance from the LushContext.  This is how we will 
+
+
+LushContext 
+* Status Code
+* Extras
+* Warning
+* 
+
+
+_Invoke It_
+
+Nothing special here, we invoke it the same way we did the previous method.  Since Lush injects the LushTicket and LushContext, we don't need to provide it.
+
+![img_3.png](img_3.png)
+
 
 
 
@@ -310,7 +344,7 @@ output
 2022-07-21 12:57:58.500 ERROR [lush-app-test,05a48d0992877809,05a48d0992877809] 5588 --- [     parallel-2] [paul] lush.core.debug                          :    	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
 2022-07-21 12:57:58.500 ERROR [lush-app-test,05a48d0992877809,05a48d0992877809] 5588 --- [     parallel-2] [paul] lush.core.debug                          :    	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
 2022-07-21 12:57:58.500 ERROR [lush-app-test,05a48d0992877809,05a48d0992877809] 5588 --- [     parallel-2] [paul] lush.core.debug                          :    	at java.base/java.lang.Thread.run(Thread.java:833)
-2022-07-21 12:57:58.501  INFO [lush-app-test,,] 5588 --- [           main] [core] c.p.lush.example.LushExampleServiceTest  : Lush LushAdvice: LushAdvice(traceId=05a48d0992877809,05a48d0992877809, statusCode=-999, warnings=[], extras={lush.isUnexpectedException=true})
+2022-07-21 12:57:58.501  INFO [lush-app-test,,] 5588 --- [           main] [core] c.p.lush.example.LushExampleServiceTest  : Lush LushAdvice: LushAdvice(traceId=05a48d0992877809,05a48d0992877809, statusCode=-99, warnings=[], extras={lush.isUnexpectedException=true})
 2022-07-21 12:57:58.501  INFO [lush-app-test,,] 5588 --- [           main] [core] c.p.lush.example.LushExampleServiceTest  : END: testUnexpectedException
 ```
 
