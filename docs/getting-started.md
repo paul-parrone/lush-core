@@ -470,20 +470,36 @@ at java.base/java.lang.Thread.run(Thread.java:833)
 </details>
 
 
-
-
-
-
-
-
 #### The uae endpoint
 Let's continue with how Lush helps with exception handling.
 
+
+_The Code_
+
+![img_9.png](img_9.png)
+
+Again, not much to note here except that it looks pretty much exactly like the code from the previous endpoint except for the added @LushControllerMethod annotation (and as we know now, this tells Lush to work it's magic around this endpoint).
+
 _Invoke It_
-Back again to our Swagger API, let's invoke the GET method on uae endpoint this time.
+
+
+Back once again to our Swagger API, let's invoke the GET method on the __uae endpoint__ this time.
 
 
 ![img_7.png](img_7.png)
+
+This time, let's take a bit of a deeper look at the highlighted sections in the image above.
+
+1. The first thing to notice is that the HTTP response is 200 (OK).  This is true, the HTTP request/response was successful, it's our endpoint that had a problem.
+
+
+2. The Lush Advice header is populated with specific details signifying the unexpected exception  
+   * As usual, we have the traceId available.
+   * Given that this is an unexpected exception , Lush uses it's reserved status code of -99.
+   * Lush has also added an extra __lush.isUnexpectedException__ to the advice.
+
+_Service Output_
+
 
 
 
