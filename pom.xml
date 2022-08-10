@@ -4,9 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <name>Lush Service Architecture</name>
+    <description>Lush Service Architecture - Core</description>
+    <url>https://github.com/paul-parrone/lush-core</url>
+
     <groupId>com.px3j</groupId>
     <artifactId>lush-core</artifactId>
-    <version>2022.7.0-SNAPSHOT</version>
+    <version>2022.8.0</version>
 
     <properties>
         <java.version>14</java.version>
@@ -248,4 +252,22 @@
             </build>
         </profile>
     </profiles>
+
+    <developers>
+        <developer>
+            <id>lush-team</id>
+            <name>Lush Team</name>
+            <email>lush-team@px3j.com</email>
+            <timezone>America/New_York</timezone>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
 </project>
