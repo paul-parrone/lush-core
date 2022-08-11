@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.jms.annotation.EnableJms;
+//import org.springframework.jms.annotation.EnableJms;
 
 /**
  * This is a simple Spring Boot application showing how to use Lush in your application.
@@ -20,7 +20,7 @@ import org.springframework.jms.annotation.EnableJms;
         "com.px3j.lush.endpoint.websocket",
         "com.px3j.example"
 })
-@EnableJms
+//@EnableJms
 public class LushExampleServiceApp {
     public static void main(String[] args) {
         SpringApplication.run(LushExampleServiceApp.class, args);

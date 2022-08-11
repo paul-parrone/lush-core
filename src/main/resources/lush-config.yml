@@ -24,11 +24,11 @@ logging:
 
 # Lush related properties are specified here
 lush:
-  exists: "lush"
   # Here you can specify public and private paths.
   # protected-paths is a comma-separated list of paths that will be protected by the Spring Security
   # by default, integrated with Lush LushTicket
+  # /actuator/**, /health/**
   security:
     protected-paths: /lush/example/*
-    public-paths: /actuator/**, /health/**
+    public-paths:
 
