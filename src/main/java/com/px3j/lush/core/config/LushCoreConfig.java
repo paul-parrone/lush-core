@@ -4,12 +4,10 @@ import brave.baggage.BaggageField;
 import brave.baggage.CorrelationScopeConfig;
 import brave.context.slf4j.MDCScopeDecorator;
 import brave.propagation.CurrentTraceContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.px3j.lush.core.util.YamlPropertySourceFactory;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,7 +23,6 @@ public class LushCoreConfig {
         log.debug( "Lush :: LushCoreConfig initialization" );
     }
 
-    @Value( "${lush.exists}" ) String testProp;
     @Bean
     BaggageField lushUserNameField() {
         return BaggageField.create("lush-user-name");

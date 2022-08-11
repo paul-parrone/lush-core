@@ -52,6 +52,9 @@ public class SecurityConfig {
 
                 .authorizeExchange( exchanges -> {
                     exchanges.pathMatchers(HttpMethod.OPTIONS).permitAll();
+                    // Require role: lush-monitor for actuator endpoints.
+                    exchanges.pathMatchers("/actuator/**", "/health/**" ).hasAuthority("lush-monitor");
+
                     publicPaths.forEach( p -> exchanges.pathMatchers(p).permitAll() );
 
                     protectedPaths.forEach( p -> exchanges.pathMatchers(p).authenticated() );
