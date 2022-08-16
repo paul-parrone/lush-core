@@ -7,5 +7,5 @@ package com.px3j.lush.endpoint.http;
  */
 public class Constants {
     public static final String ADVICE_HEADER_NAME = "x-lush-advice";
-    public static final String WHO_HEADER_NAME = "x-lush-who";
+    public static final String TICKET_HEADER_NAME = "x-lush-ticket";
 }

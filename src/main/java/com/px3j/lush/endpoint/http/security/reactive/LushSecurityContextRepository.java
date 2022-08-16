@@ -32,18 +32,18 @@ public class LushSecurityContextRepository implements ServerSecurityContextRepos
 
     @Override
     public Mono<SecurityContext> load(ServerWebExchange exchange) {
-        List<String> whoList = exchange.getRequest().getHeaders().get(Constants.WHO_HEADER_NAME);
+        List<String> ticketList = exchange.getRequest().getHeaders().get(Constants.TICKET_HEADER_NAME);
 
         // Header isn't available, deny access...
-        if(whoList == null || whoList.isEmpty()) {
+        if(ticketList == null || ticketList.isEmpty()) {
             return Mono.empty();
         }
 
         // Header is an array, get the first element.
-        final String whoAsJson = whoList.get(0);
+        final String ticketFromHeader = ticketList.get(0);
 
         try {
-            LushTicket ticket = ticketUtil.decrypt(whoAsJson);
+            LushTicket ticket = ticketUtil.decrypt(ticketFromHeader);
 
             TicketAuthenticationToken authToken = new TicketAuthenticationToken(ticket);
             authToken.setAuthenticated(true);
@@ -51,7 +51,7 @@ public class LushSecurityContextRepository implements ServerSecurityContextRepos
             return Mono.just( new SecurityContextImpl(authToken) );
         }
         catch (JsonSyntaxException e) {
-            log.warn( "Invalid JSON in who header" );
+            log.warn( "Invalid JSON in Lush Ticket header" );
             return Mono.empty();
         }
     }

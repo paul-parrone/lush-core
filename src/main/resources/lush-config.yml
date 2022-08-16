@@ -1,10 +1,10 @@
 spring:
   application:
-    # typical spring application name, should be overridden by users of Lush
+    # typical spring application name, should be overridden by Lush services
     name: lush-core
 
-  # Lush integration with Spring Cloud Sleuth - this allows Lush to carry the requesting user
-  # name across all Lush based service logs.
+  # Lush integration with Spring Cloud Sleuth - this allows Lush to carry the requesting username
+  # across all Lush based service logs.
   sleuth:
     baggage:
       local-fields:

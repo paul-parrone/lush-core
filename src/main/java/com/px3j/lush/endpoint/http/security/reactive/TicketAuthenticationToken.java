@@ -6,7 +6,7 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import java.util.Map;
 
 /**
- * Intergrate our LushTicket with Spring Security
+ * Integrate our LushTicket with Spring Security
  *
  * @author Paul Parrone
  */

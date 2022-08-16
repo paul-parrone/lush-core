@@ -1,6 +1,7 @@
 package com.px3j.example;
 
 import com.google.gson.Gson;
+import com.px3j.example.service.model.Cat;
 import com.px3j.lush.core.model.LushAdvice;
 import com.px3j.lush.core.ticket.LushTicket;
 import com.px3j.example.service.LushExampleServiceApp;
@@ -27,7 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static com.px3j.lush.endpoint.http.Constants.WHO_HEADER_NAME;
+import static com.px3j.lush.endpoint.http.Constants.TICKET_HEADER_NAME;
 
 @Slf4j
 @ActiveProfiles( profiles = {"developer", "clear-ticket"})
@@ -37,14 +38,9 @@ public class LushExampleServiceTest {
     private WebTestClient webTestClient;
     private final TicketUtil ticketUtil;
 
-//    private final ExampleSender exampleSender;
-//    private final Tracer tracer;
-
     @Autowired
-    public LushExampleServiceTest(TicketUtil ticketUtil/*, ExampleSender exampleSender, Tracer tracer*/) {
+    public LushExampleServiceTest(TicketUtil ticketUtil) {
         this.ticketUtil = ticketUtil;
-//        this.exampleSender = exampleSender;
-//        this.tracer = tracer;
     }
 
     @Autowired
@@ -72,7 +68,7 @@ public class LushExampleServiceTest {
                 .uri("/lush/example/ping" )
                 .accept(MediaType.APPLICATION_JSON)
                 .headers( httpHeaders -> httpHeaders.put(
-                        WHO_HEADER_NAME,
+                        TICKET_HEADER_NAME,
                         List.of(encodedTicket)
                 ))
                 .exchange()
@@ -95,7 +91,7 @@ public class LushExampleServiceTest {
                 .uri("/lush/example/pingUser" )
                 .accept(MediaType.APPLICATION_JSON)
                 .headers( httpHeaders -> httpHeaders.put(
-                        WHO_HEADER_NAME,
+                        TICKET_HEADER_NAME,
                         List.of(encodedTicket)
                 ))
                 .exchange()
@@ -107,31 +103,33 @@ public class LushExampleServiceTest {
     }
 
     @Test
-    public void testFluxOfInts() {
-        log.info( "START: testFluxOfInts" );
+    public void testFluxOfCats() {
+        log.info( "START: testFluxOfCats" );
 
         LushTicket ticket = new LushTicket("paul", "", List.of(new SimpleGrantedAuthority("user")));
         final String encodedTicket = ticketUtil.encrypt(ticket);
 
         webTestClient
                 .get()
-                .uri("/lush/example/fluxOfInts" )
+                .uri("/lush/example/fluxOfCats" )
                 .accept(MediaType.APPLICATION_JSON)
                 .headers( httpHeaders -> httpHeaders.put(
-                        WHO_HEADER_NAME,
+                        TICKET_HEADER_NAME,
                         List.of(encodedTicket)
                 ))
                 .exchange()
-                .expectBodyList(Integer.class)
-                .value( l -> l.forEach(i -> log.info( ""+i ) ))
+                .expectBodyList(Cat.class)
+                .value( l -> {
+                    l.forEach( i -> log.info( i.toString() ) );
+                })
                 .returnResult();
 
-        log.info( "END: testFluxOfInts" );
+        log.info( "END: testFluxOfCat" );
     }
 
     @Test
-    public void testFluxOfIntsWithAdvice() {
-        testFluxOfIntsWithAdviceImpl("tester");
+    public void testFluxOfCatsWithAdvice() {
+        testFluxOfCatsWithAdviceImpl("tester");
     }
 
     @Test
@@ -146,7 +144,7 @@ public class LushExampleServiceTest {
                 .uri("/lush/example/uae")
                 .accept(MediaType.APPLICATION_JSON)
                 .headers(httpHeaders -> httpHeaders.put(
-                        WHO_HEADER_NAME,
+                        TICKET_HEADER_NAME,
                         List.of(encodedTicket)
                 ))
                 .exchange()
@@ -174,7 +172,7 @@ public class LushExampleServiceTest {
                 .uri("/lush/example/uaeNoLush")
                 .accept(MediaType.APPLICATION_JSON)
                 .headers(httpHeaders -> httpHeaders.put(
-                        WHO_HEADER_NAME,
+                        TICKET_HEADER_NAME,
                         List.of(encodedTicket)
                 ))
                 .exchange()
@@ -203,7 +201,7 @@ public class LushExampleServiceTest {
                 .uri("/lush/example/xray")
                 .accept(MediaType.APPLICATION_JSON)
                 .headers(httpHeaders -> httpHeaders.put(
-                        WHO_HEADER_NAME,
+                        TICKET_HEADER_NAME,
                         List.of(encodedTicket)
                 ))
                 .exchange()
@@ -216,58 +214,41 @@ public class LushExampleServiceTest {
         log.info( "END: testXray" );
     }
 
-    // TODO: JMS support coming soon.
-/*
-    @Test
-    void testJmsSend() {
-        log.info( "START: testJmsSend" );
-
-        final Span span = tracer.nextSpan();
-        final LushTicket ticket = new LushTicket("paul", "", List.of(new SimpleGrantedAuthority("user")));
-
-        try(Tracer.SpanInScope spanInScope = tracer.withSpan(span)) {
-            log.info( "About to send a JMS message" );
-            exampleSender.send("jms.message.endpoint", ticket, "first message" );
-            exampleSender.send("jms.message.endpoint", ticket, "second message" );
-        }
-
-        log.info( "END: testJmsSend" );
-    }
-*/
-
     @Test
     public void testWithAdviceThreaded() throws Exception {
         int numThreads = 15;
         ExecutorService executor = Executors.newFixedThreadPool( numThreads );
 
         for( int i=0; i<numThreads; i++ ) {
-            executor.submit( () -> testFluxOfIntsWithAdviceImpl(UUID.randomUUID().toString()));
+            executor.submit( () -> {
+                testFluxOfCatsWithAdviceImpl(UUID.randomUUID().toString());
+            });
         }
 
         executor.shutdown();
         executor.awaitTermination( 10, TimeUnit.SECONDS );
     }
 
-    private void testFluxOfIntsWithAdviceImpl( String username ) {
+    private void testFluxOfCatsWithAdviceImpl( String username ) {
         username = username == null ? "paul" : username;
 
         LushTicket ticket = new LushTicket(username, "", List.of(new SimpleGrantedAuthority("user")));
         final String encodedTicket = ticketUtil.encrypt(ticket);
 
-        Flux<Integer> data =webTestClient
+        Flux<Cat> data =webTestClient
                 .get()
-                .uri("/lush/example/fluxOfIntsWithAdvice")
+                .uri("/lush/example/fluxOfCatsWithAdvice")
                 .accept(MediaType.APPLICATION_JSON)
                 .headers(httpHeaders -> httpHeaders.put(
-                        WHO_HEADER_NAME,
+                        TICKET_HEADER_NAME,
                         List.of(encodedTicket)
                 ))
                 .exchange()
                 .expectHeader().value("x-lush-advice", this::displayAdvice)
-                .returnResult(Integer.class)
+                .returnResult(Cat.class)
                 .getResponseBody();
 
-        data.subscribe( s -> log.info( "{}", s ));
+        data.subscribe( s -> log.info( "{}", s.toString() ));
     }
 
     private void displayAdvice(HttpHeaders headers) {

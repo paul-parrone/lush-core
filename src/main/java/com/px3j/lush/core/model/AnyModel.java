@@ -12,6 +12,10 @@ import java.util.Map;
  * @author Paul Parrone
  */
 public class AnyModel extends HashMap<String, Object> {
+    public AnyModel() {
+        super();
+    }
+
     public AnyModel(Map<String, Object> m) {
         super(m);
     }

@@ -41,7 +41,7 @@ public class LushCoreConfig {
     @Bean
     Gson gson() {
         return new GsonBuilder()
-                .setPrettyPrinting()
+//                .setPrettyPrinting()
                 .disableHtmlEscaping()
                 .create();
     }
