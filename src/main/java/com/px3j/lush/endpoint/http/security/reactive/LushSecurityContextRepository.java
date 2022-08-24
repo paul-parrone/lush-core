@@ -16,7 +16,7 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 @Component
-@Slf4j
+@Slf4j( topic = "lush.core.debug")
 public class LushSecurityContextRepository implements ServerSecurityContextRepository {
     private final TicketUtil ticketUtil;
 
@@ -36,6 +36,9 @@ public class LushSecurityContextRepository implements ServerSecurityContextRepos
 
         // Header isn't available, deny access...
         if(ticketList == null || ticketList.isEmpty()) {
+            if( log.isDebugEnabled() ) {
+                log.debug( "DENY: Request is missing Lush Ticket header: " + Constants.TICKET_HEADER_NAME );
+            }
             return Mono.empty();
         }
 
@@ -47,11 +50,16 @@ public class LushSecurityContextRepository implements ServerSecurityContextRepos
 
             TicketAuthenticationToken authToken = new TicketAuthenticationToken(ticket);
             authToken.setAuthenticated(true);
+            if( log.isDebugEnabled() ) {
+                log.debug( "ALLOW: userName: " + ticket.getUsername() );
+            }
 
             return Mono.just( new SecurityContextImpl(authToken) );
         }
         catch (JsonSyntaxException e) {
-            log.warn( "Invalid JSON in Lush Ticket header" );
+            if( log.isDebugEnabled() ) {
+                log.debug( "DENY: Invalid JSON in Lush Ticket header: " + Constants.TICKET_HEADER_NAME );
+            }
             return Mono.empty();
         }
     }

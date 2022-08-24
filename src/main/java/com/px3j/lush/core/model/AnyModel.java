@@ -30,19 +30,20 @@ public class AnyModel extends HashMap<String, Object> {
         Map<String,Object> m = new HashMap<>(values.length/2);
 
         int index = 0;
-        boolean atKey = true;
+        boolean expectKey = true;
         String key = null;
 
         for( Object v : values) {
-            if(atKey) {
+            if(expectKey) {
                 if( !(v instanceof String) ) {
                     throw new LushException("Expected a String for param number: " + index );
                 }
-                atKey = false;
                 key = (String)v;
+                expectKey = false;
             }
             else {
                 m.put( key, v );
+                expectKey = true;
             }
         }
 

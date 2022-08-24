@@ -617,8 +617,30 @@ For local development builds, Consul is integrated via spring-cloud-starter-cons
 | lush.security.protected.paths                     | empty                | A comma-separated list of paths that require a Lush Ticket for access.                                                                                                                                    |
 | lush.security.public.paths                        | empty                | A comma-separated list of paths that DON'T require a Lush Ticket for access.                                                                                                                              |
 
-#### Feign integration / example
+#### Invoking other Lush services
+Anticipating that services may have to interact, Lush includes the required dependencies for  [Reactive Feign Client](https://github.com/PlaytikaOSS/feign-reactive).  There is an example of it in all generated Lush services.
+
+In the ExampleController, you'll find an endpoint called pingRemote - this endpoint illustrates how you can invoke an endpoint on another Lush service.   
+
+![img_13.png](img_13.png)
+
+Taking advantage of OpenFeign, we can define how to invoke the remote endpoint in a declarative manner (__{your-package}.lush.feign.ExampleServiceApi__).
+
+![img_12.png](img_12.png)
+
+When invoking a remote Lush service in this manner, all context information is carried across to the invoked service.
 
 #### JavaScript consumer
 
+#### Encrypting Lush Tickets
+As noted earlier, if you don't activate the __clear-ticket__ Spring profile, Lush will expect that all Lush Tickets are encrypted.  In order to decrypt a ticket, Lush requires the following two properties to be set:
+
+| Property                                          |
+|---------------------------------------------------|
+| lush.crypto.access-key<br/>lush.crypto.secret-key |
+                                                                                |
+
+
+
+ 
 
