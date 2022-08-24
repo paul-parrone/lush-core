@@ -630,17 +630,26 @@ Taking advantage of OpenFeign, we can define how to invoke the remote endpoint i
 
 When invoking a remote Lush service in this manner, all context information is carried across to the invoked service.
 
-#### JavaScript consumer
 
 #### Encrypting Lush Tickets
 As noted earlier, if you don't activate the __clear-ticket__ Spring profile, Lush will expect that all Lush Tickets are encrypted.  In order to decrypt a ticket, Lush requires the following two properties to be set:
 
-| Property                                          |
-|---------------------------------------------------|
-| lush.crypto.access-key<br/>lush.crypto.secret-key |
-                                                                                |
+| Property               |
+|------------------------|
+| lush.crypto.access-key |
+| lush.crypto.secret-key |
 
+##### Generating keys
+The ExampleController from the Lush Service Archetype contains an endpoint to generate a new set of crypto keys.  The code from that method is below for reference purposes:
 
+![img_14.png](img_14.png)
 
+You can also invoke it using Swagger if you'd like:
+
+![img_15.png](img_15.png)
  
+The response contains a unique set of keys that can be used to encrypt/decrypt Lush Ticket(s).  Remember that both the issuing service and the receiving service(s) must use the same keys.
+
+#### JavaScript consumer
+The fact that all HTTP Lush endpoints respond in a consistent manner allows for common architectural consumer code to be written to handle Lush responses.  We have this code, it will be published soon, in the meantime if you'd like an example prior to it being available, feel free to contact us.   
 
