@@ -11,6 +11,8 @@ This begs the question - How does one go from the seemingly endless functionalit
 
 Lush is born of multiple iterations of service architecture that I have had the good fortune to build (on top of the vast Spring Framework) over the years.  If you think of it in visual terms, Lush is what comes out if we were to pour the entire Spring Framework through a **service architecture funnel**.
 
+![funnel.png](docs/funnel.png)
+
 **Lush doesn't try to wrap or hide the Spring Framework at all, nor does it try to change the way we do things**.  It simply provides a pre-assembled set of components that already work together, thus giving you a head start at building production ready services.  If Spring is a bunch of individual blocks, Lush is a portion of those blocks partially assembled.
 
 I've been fortunate to build quite a few systems from the ground up.  I have always found that there is a necessary amount of infrastructure code and design patterns necessary to start and build a consistent and reliable service.  Infrastructure that answers the following questions (not an all-inclusive list):
