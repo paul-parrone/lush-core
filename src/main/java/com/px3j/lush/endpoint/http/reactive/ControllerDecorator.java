@@ -48,14 +48,20 @@ public class ControllerDecorator {
             log.debug( "intercepted request - Mono invocation" );
         }
 
-        return ReactiveSecurityContextHolder.getContext()
-                .map( sc -> (LushTicket) sc.getAuthentication().getPrincipal() )
-                .map(ticket -> {
-                    if( log.isDebugEnabled() ) log.debug( "ticket user: " + ticket.getUsername() );
-                    lushUserNameField.updateValue(ticket.getUsername());
-                    return ticket;
-                })
-                .flatMap( (ticket) -> (Mono)decoratorImpl(pjp, ticket,false) );
+        return Mono.deferContextual( ctx -> {
+            LushContext lushContext = ctx.get(LushContext.class.getName());
+            log.debug( "LushContext: " + lushContext );
+
+            return ReactiveSecurityContextHolder.getContext()
+                    .map( sc -> (LushTicket) sc.getAuthentication().getPrincipal() )
+                    .map(ticket -> {
+                        if( log.isDebugEnabled() ) log.debug( "ticket user: " + ticket.getUsername() );
+                        lushUserNameField.updateValue(ticket.getUsername());
+                        return ticket;
+                    })
+                    .flatMap( (ticket) -> (Mono)decoratorImpl(pjp, lushContext, ticket,false) );
+        });
+
     }
 
     @Around("lushControllerMethods() && execution(public reactor.core.publisher.Flux *..*(..))")
@@ -65,18 +71,23 @@ public class ControllerDecorator {
             log.debug("intercepted request - Flux invocation");
         }
 
-        return ReactiveSecurityContextHolder.getContext()
-                .map( sc -> (LushTicket) sc.getAuthentication().getPrincipal() )
-                .map(ticket -> {
-                    if( log.isDebugEnabled() ) log.debug( "ticket user: " + ticket.getUsername() );
-                    lushUserNameField.updateValue(ticket.getUsername());
-                    return ticket;
-                })
-                .flatMapMany( (ticket) -> (Flux)decoratorImpl(pjp, ticket,true) );
+        return Flux.deferContextual( ctx -> {
+            LushContext lushContext = ctx.get(LushContext.class.getName());
+            log.debug( "LushContext: " + lushContext );
+
+            return ReactiveSecurityContextHolder.getContext()
+                    .map( sc -> (LushTicket) sc.getAuthentication().getPrincipal() )
+                    .map(ticket -> {
+                        if( log.isDebugEnabled() ) log.debug( "ticket user: " + ticket.getUsername() );
+                        lushUserNameField.updateValue(ticket.getUsername());
+                        return ticket;
+                    })
+                    .flatMapMany( (ticket) -> (Flux)decoratorImpl(pjp, lushContext, ticket,true) );
+        });
     }
 
-    private Object decoratorImpl(ProceedingJoinPoint pjp, LushTicket ticket, boolean fluxOnError ) {
-        CarryingContext apiContext = (CarryingContext)ThreadLocalApiContext.get();
+    private Object decoratorImpl(ProceedingJoinPoint pjp, LushContext apiContext, LushTicket ticket, boolean fluxOnError ) {
+//        CarryingContext apiContext = (CarryingContext)ThreadLocalApiContext.get();
 
         try {
             // Get the target method from the join point, use this to inject parameters.
