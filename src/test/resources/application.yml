@@ -9,6 +9,9 @@ management:
     web:
       exposure:
         include: "*" #, openapi, swagger-ui
+  tracing:
+    sampling:
+      probability: 1.0
 
 logging:
   level:

@@ -17,6 +17,15 @@ spring:
       tag-fields:
         - lush-user-name
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  tracing:
+    sampling:
+      probability: 1.0
+
 logging:
   level:
     root: INFO
