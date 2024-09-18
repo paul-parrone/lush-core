@@ -17,19 +17,11 @@ spring:
       tag-fields:
         - lush-user-name
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  tracing:
-    sampling:
-      probability: 1.0
-
 logging:
   level:
     root: INFO
     com.px3j.lush: ERROR
+
 
 # Lush related properties are below
 lush:
@@ -39,3 +31,7 @@ lush:
     protected-paths: /lush/example/*
     public-paths:
 
+management:
+  tracing:
+    sampling:
+      probability: 1.0
